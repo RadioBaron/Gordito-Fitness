@@ -17,18 +17,18 @@
       --text-muted: #94a3b8;
     }
     
-    #app { display: flex; flex-direction: column; height: 100vh; }
-    #header { background: #1a1f2e; padding: 1rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-    #header h1 { font-size: 1.5rem; color: var(--primary); }
-    #content { flex: 1; overflow-y: auto; padding: 1.5rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-    #bottomNav { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f2e; border-top: 1px solid #333; display: flex; justify-content: space-around; height: 70px; padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 100; }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); border: none; background: none; font-size: 0.7rem; font-weight: 700; }
+    #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+    #header { background: #1a1f2e; padding: 0.85rem 1rem; border-bottom: 1px solid #2d3748; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    #header h1 { font-size: 1.3rem; color: var(--primary); }
+    #content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1rem; max-width: 600px; margin: 0 auto; width: 100%; -webkit-overflow-scrolling: touch; }
+    #bottomNav { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f2e; border-top: 1px solid #2d3748; display: flex; justify-content: space-around; z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); border: none; background: none; font-size: 0.65rem; font-weight: 700; padding: 0.6rem 0; min-height: 60px; letter-spacing: 0.02em; }
     .nav-item.active { color: var(--primary); }
-    .nav-item span { font-size: 1.5rem; margin-bottom: 0.3rem; }
+    .nav-item span { font-size: 1.4rem; margin-bottom: 0.2rem; line-height: 1; }
 
-    h2 { font-size: 2rem; margin: 2rem 0 1rem 0; color: var(--primary); }
-    h3 { font-size: 1.3rem; margin: 1.5rem 0 0.75rem 0; }
-    h4 { color: var(--primary); margin: 0.5rem 0; font-size: 1.1rem; }
+    h2 { font-size: clamp(1.4rem, 6vw, 2rem); margin: 1.5rem 0 0.75rem 0; color: var(--primary); word-break: break-word; }
+    h3 { font-size: 1.1rem; margin: 1.25rem 0 0.6rem 0; }
+    h4 { color: var(--primary); margin: 0.5rem 0; font-size: 1rem; }
     
     .card { background: var(--card-bg); border: 1px solid #333; border-radius: 0.75rem; padding: 1.5rem; margin: 1rem 0; }
     .card:hover { border-color: var(--primary); transition: 0.2s; }
@@ -82,10 +82,20 @@
     #timerCount { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 0 0.4rem; transition: color 0.3s; }
     .pr-badge { display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 0.7rem; font-weight: 800; padding: 0.15rem 0.4rem; border-radius: 0.25rem; margin-left: 0.4rem; vertical-align: middle; }
     
-    #content { padding-bottom: 160px; }
-    @media (max-width: 768px) { 
+    #content { padding-bottom: 100px; }
+    .hero-section { background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(139,92,246,0.05) 100%); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1rem; }
+    .hero-title { font-size: clamp(1.6rem, 7vw, 2.2rem); font-weight: 800; color: #fff; line-height: 1.2; }
+    .hero-title span { color: var(--primary); display: block; }
+    .hero-desc { color: var(--text-muted); font-size: 0.9rem; margin: 0.5rem 0 1rem; }
+    .icon-card { display: flex; align-items: center; gap: 1rem; background: var(--card-bg); border: 1px solid #2d3748; border-radius: 0.75rem; padding: 1rem 1.25rem; margin: 0.65rem 0; }
+    .icon-card .icon-box { width: 44px; height: 44px; border-radius: 0.6rem; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .icon-card .ic-green { background: rgba(16,185,129,0.15); }
+    .icon-card .ic-purple { background: rgba(139,92,246,0.15); }
+    .icon-card .ic-orange { background: rgba(249,115,22,0.15); }
+    .icon-card .ic-text h4 { margin: 0; font-size: 0.95rem; color: #fff; }
+    .icon-card .ic-text p { margin: 0.15rem 0 0; font-size: 0.78rem; color: var(--text-muted); }
+    @media (max-width: 768px) {
       .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      #header h1 { font-size: 1.2rem; }
     }
   </style>
 </head>
@@ -700,10 +710,21 @@
 
       // ===== DASHBOARD =====
       renderDashboard() {
-        let html = '<h2>Välkommen, ' + (this.state.userName || 'Tränaren') + '!</h2>';
-
+        const name = this.state.userName || 'Tränaren';
         let activeProgram = this.state.programs.find(p => p.active);
         if (!activeProgram && this.state.programs.length > 0) activeProgram = this.state.programs[0];
+
+        // Hero section
+        let html = '<div class="hero-section">';
+        html += '<div class="hero-title">Välkommen,<span>' + name + '! 💪</span></div>';
+        if (activeProgram) {
+          html += '<p class="hero-desc">Du har ett aktivt program. Dags att träna!</p>';
+          html += '<button class="btn-primary" style="margin:0;" onclick="app.startWorkout()">▶ Starta träning</button>';
+        } else {
+          html += '<p class="hero-desc">Kom igång – skapa ditt första träningsprogram.</p>';
+          html += '<button class="btn-primary" style="margin:0;" onclick="app.setView(\'programs\')">+ Skapa program</button>';
+        }
+        html += '</div>';
 
         if (activeProgram) {
           const dayIdx = (activeProgram.currentDayInWeek || 0) % activeProgram.schedule.length;
@@ -775,27 +796,34 @@
           }
 
         } else {
-          html += '<div class="card"><p class="text-muted">Inget program valt. Skapa eller välj ett program.</p>';
-          html += '<button class="btn-primary" onclick="app.setView(\'programs\')">Gå till program</button></div>';
+          // No program – show quick-start icon cards
+          html += '<div class="icon-card" onclick="app.setView(\'programs\')" style="cursor:pointer;border-color:rgba(16,185,129,0.3);">';
+          html += '<div class="icon-box ic-green">🏋️</div>';
+          html += '<div class="ic-text"><h4>Skapa träningsprogram</h4><p>Välj bland 6 typer av träning</p></div></div>';
+          html += '<div class="icon-card" onclick="app.setView(\'programs\')" style="cursor:pointer;">';
+          html += '<div class="icon-box ic-purple">📅</div>';
+          html += '<div class="ic-text"><h4>Planera din vecka</h4><p>2–6 träningsdagar per vecka</p></div></div>';
+          html += '<div class="icon-card" onclick="app.setView(\'history\')" style="cursor:pointer;">';
+          html += '<div class="icon-box ic-orange">📈</div>';
+          html += '<div class="ic-text"><h4>Följ din progress</h4><p>Historik och statistik</p></div></div>';
         }
 
-        html += '<h3>Statistik</h3>';
-        html += '<div class="grid-2">';
-        html += '<div class="stat-card"><div class="text-muted">Träningar</div><div class="stat-value">' + this.state.workoutHistory.length + '</div></div>';
+        // Stats
+        const totalW = this.state.workoutHistory.length;
         const passedAll = this.state.workoutHistory.filter(w => w.passed).length;
-        html += '<div class="stat-card"><div class="text-muted">Pass godkända</div><div class="stat-value">' + passedAll + '</div></div>';
+        html += '<h3 style="margin-top:1.25rem;">Statistik</h3>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">';
+        html += '<div class="stat-card"><div class="text-muted" style="font-size:0.8rem;">Träningar</div><div class="stat-value">' + totalW + '</div></div>';
+        html += '<div class="stat-card"><div class="text-muted" style="font-size:0.8rem;">Godkända pass</div><div class="stat-value">' + passedAll + '</div></div>';
         html += '</div>';
 
         if (this.state.workoutHistory.length > 0) {
-          html += '<h3>Senaste träning</h3>';
           const last = this.state.workoutHistory[this.state.workoutHistory.length - 1];
-          html += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;">';
-          html += '<div><p><strong>' + last.day + '</strong></p>';
-          html += '<p class="text-muted">' + new Date(last.date).toLocaleDateString('sv-SE') + '</p></div>';
-          html += '<div style="text-align:right;">';
-          html += '<div style="font-size:1.5rem;">' + (last.passed ? '✅' : '⚠️') + '</div>';
-          if (last.completionPct !== undefined) html += '<div style="font-size:0.8rem;color:var(--text-muted);">' + last.completionPct + '%</div>';
-          html += '</div></div>';
+          html += '<h3 style="margin-top:1.25rem;">Senaste träning</h3>';
+          html += '<div class="icon-card">';
+          html += '<div class="icon-box ic-green">' + (last.passed ? '✅' : '⚠️') + '</div>';
+          html += '<div class="ic-text"><h4>' + last.day + '</h4>';
+          html += '<p>' + new Date(last.date).toLocaleDateString('sv-SE') + (last.completionPct !== undefined ? ' · ' + last.completionPct + '%' : '') + '</p></div></div>';
         }
 
         return html;
