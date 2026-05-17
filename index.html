@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gordito Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; font-family: 'Poppins', sans-serif; background: #0f1419; color: #fff; overflow: hidden; }
+    :root {
+      --primary: #10b981;
+      --secondary: #8b5cf6;
+      --accent: #f97316;
+      --danger: #ef4444;
+      --card-bg: #1e293b;
+      --text-muted: #94a3b8;
+    }
+    
+    #app { display: flex; flex-direction: column; height: 100vh; }
+    #header { background: #1a1f2e; padding: 1rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+    #header h1 { font-size: 1.5rem; color: var(--primary); }
+    #content { flex: 1; overflow-y: auto; padding: 1.5rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+    #bottomNav { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f2e; border-top: 1px solid #333; display: flex; justify-content: space-around; height: 70px; z-index: 100; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); border: none; background: none; font-size: 0.7rem; font-weight: 700; }
+    .nav-item.active { color: var(--primary); }
+    .nav-item span { font-size: 1.5rem; margin-bottom: 0.3rem; }
+
+    h2 { font-size: 2rem; margin: 2rem 0 1rem 0; color: var(--primary); }
+    h3 { font-size: 1.3rem; margin: 1.5rem 0 0.75rem 0; }
+    h4 { color: var(--primary); margin: 0.5rem 0; font-size: 1.1rem; }
+    
+    .card { background: var(--card-bg); border: 1px solid #333; border-radius: 0.75rem; padding: 1.5rem; margin: 1rem 0; }
+    .card:hover { border-color: var(--primary); transition: 0.2s; }
+    
+    button { font-family: 'Poppins', sans-serif; border: none; cursor: pointer; border-radius: 0.75rem; font-weight: 600; padding: 0.75rem 1.5rem; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, #059669 100%); color: white; width: 100%; padding: 1rem; margin: 1rem 0; font-size: 1.05rem; }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-secondary { background: #334155; color: #fff; margin: 0.5rem 0; padding: 0.75rem 1.5rem; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-small { padding: 0.5rem 1rem; font-size: 0.85rem; }
+    .btn-danger { background: var(--danger); color: white; }
+    
+    input, select, textarea { background: var(--card-bg); border: 1px solid #333; color: #fff; padding: 0.75rem; border-radius: 0.5rem; font-family: 'Poppins', sans-serif; width: 100%; margin: 0.5rem 0; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    
+    label { display: block; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; margin: 1rem 0 0.25rem 0; text-transform: uppercase; }
+    
+    .text-muted { color: var(--text-muted); font-size: 0.9rem; }
+    .hidden { display: none !important; }
+    .logout-btn { background: var(--danger); color: white; }
+    
+    .toast-container { position: fixed; bottom: 100px; left: 1rem; right: 1rem; z-index: 1000; max-width: 500px; }
+    .toast { background: var(--card-bg); border-left: 4px solid var(--primary); color: #fff; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; animation: slideIn 0.3s; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .stat-card { background: var(--card-bg); border: 1px solid #333; border-radius: 0.75rem; padding: 1.5rem; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+    
+    .exercise-item { background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--primary); padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; cursor: pointer; }
+    .exercise-item strong { color: var(--primary); display: block; margin-bottom: 0.25rem; }
+    .exercise-item:hover { background: rgba(16, 185, 129, 0.15); }
+    
+    .program-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%); border: 2px solid var(--primary); border-radius: 0.75rem; padding: 1.5rem; margin: 1rem 0; cursor: pointer; }
+    .program-card:hover { border-color: var(--accent); }
+    .program-card h4 { margin-top: 0; }
+    
+    .tab-buttons { display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap; }
+    .tab-btn { background: #334155; color: #fff; border: 2px solid transparent; }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    .loading { text-align: center; padding: 2rem; }
+    .spinner { display: inline-block; border: 3px solid #334155; border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #timerBar { display: none; background: #1a1f2e; border-bottom: 2px solid var(--primary); padding: 0.5rem 1rem; flex-direction: row; justify-content: space-between; align-items: center; }
+    #timerBar.active { display: flex; }
+    #timerBar.urgent { border-color: var(--accent); }
+    #timerBar.urgent #timerCount { color: var(--accent); }
+    #timerCount { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 0 0.4rem; transition: color 0.3s; }
+    .pr-badge { display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 0.7rem; font-weight: 800; padding: 0.15rem 0.4rem; border-radius: 0.25rem; margin-left: 0.4rem; vertical-align: middle; }
+    
+    #content { padding-bottom: 100px; }
+    @media (max-width: 768px) { 
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      #header h1 { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="header">
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <!-- Gordito mascot: chubby dude lifting dumbbells -->
+        <svg width="46" height="52" viewBox="0 0 46 52" xmlns="http://www.w3.org/2000/svg">
+          <!-- Left dumbbell weights -->
+          <rect x="0" y="6" width="3.5" height="7" rx="1.5" fill="#f97316"/>
+          <rect x="5.5" y="6" width="3.5" height="7" rx="1.5" fill="#f97316"/>
+          <rect x="2" y="8" width="6" height="3" rx="1" fill="#f59e0b"/>
+          <!-- Right dumbbell weights -->
+          <rect x="38" y="6" width="3.5" height="7" rx="1.5" fill="#f97316"/>
+          <rect x="43.5" y="6" width="3.5" height="7" rx="1.5" fill="#f97316"/>
+          <rect x="38.5" y="8" width="6" height="3" rx="1" fill="#f59e0b"/>
+          <!-- Left arm up -->
+          <line x1="9" y1="9.5" x2="15" y2="21" stroke="#059669" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Right arm up -->
+          <line x1="37" y1="9.5" x2="31" y2="21" stroke="#059669" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Chubby body / big belly -->
+          <ellipse cx="23" cy="34" rx="13" ry="13" fill="#10b981"/>
+          <!-- Head -->
+          <circle cx="23" cy="16" r="8" fill="#10b981"/>
+          <!-- Sweatband -->
+          <path d="M15.5 13 Q23 10 30.5 13" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <!-- Eyes -->
+          <circle cx="20" cy="15" r="1.5" fill="white"/>
+          <circle cx="26" cy="15" r="1.5" fill="white"/>
+          <circle cx="20.5" cy="15.3" r="0.7" fill="#0f1419"/>
+          <circle cx="26.5" cy="15.3" r="0.7" fill="#0f1419"/>
+          <!-- Big grin -->
+          <path d="M19 18.5 Q23 23 27 18.5" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <!-- Sweat drop -->
+          <ellipse cx="33" cy="10" rx="1.2" ry="1.8" fill="#60a5fa" opacity="0.8"/>
+          <!-- Legs -->
+          <line x1="18" y1="45" x2="15" y2="52" stroke="#059669" stroke-width="4.5" stroke-linecap="round"/>
+          <line x1="28" y1="45" x2="31" y2="52" stroke="#059669" stroke-width="4.5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div style="font-size:1.3rem;font-weight:800;color:var(--primary);line-height:1.1;letter-spacing:-0.02em;">Gordito</div>
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-muted);letter-spacing:0.12em;text-transform:uppercase;">Fitness</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="timerBar">
+      <div style="display:flex;align-items:center;gap:0.25rem;">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Vila</span>
+        <span id="timerCount">90</span>
+        <span style="font-size:0.8rem;color:var(--text-muted);">s</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span id="timerMsg" style="font-size:0.78rem;color:var(--text-muted);"></span>
+        <button onclick="app.clearTimer()" style="background:none;border:1px solid #334155;color:var(--text-muted);padding:0.25rem 0.6rem;border-radius:0.4rem;font-size:0.85rem;cursor:pointer;">✕</button>
+      </div>
+    </div>
+
+    <div id="content"></div>
+    
+    <div id="bottomNav" class="hidden">
+      <button class="nav-item active" onclick="app.setView('dashboard')"><span>📅</span><div>Workout</div></button>
+      <button class="nav-item" onclick="app.setView('programs')"><span>📊</span><div>Program</div></button>
+      <button class="nav-item" onclick="app.setView('history')"><span>📈</span><div>Historia</div></button>
+      <button class="nav-item" onclick="app.setView('more')"><span>⋯</span><div>Mer</div></button>
+    </div>
+    
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script>
+    // ===== WORKOUT TEMPLATES & LIBRARY =====
+    const WorkoutLibrary = {
+
+      programTypes: {
+        styrka:       { name: 'Styrka & Hypertrofi', desc: 'Push/Pull/Legs med skivstång och hantlar', icon: '🏋️', days: [3,4,5,6], defaultGoal: 'hypertrophy' },
+        helkropp:     { name: 'Helkropp',            desc: 'Hela kroppen varje pass – perfekt för nybörjare', icon: '💪', days: [2,3], defaultGoal: 'strength' },
+        kroppsvikt:   { name: 'Kroppsvikt',          desc: 'Ingen utrustning – träna var som helst', icon: '🤸', days: [3,4,5], defaultGoal: 'hypertrophy' },
+        powerlifting: { name: 'Powerlifting',         desc: 'Squat, Bänkpress och Marklyft – maxstyrka', icon: '🦁', days: [3,4], defaultGoal: 'strength' },
+        hiit:         { name: 'HIIT',                desc: 'Högintensiva intervaller – bränner fett snabbt', icon: '🔥', days: [3,4], defaultGoal: 'conditioning' },
+        kondition:    { name: 'Kondition',            desc: 'Löpning, cykling och uthållighetsträning', icon: '🏃', days: [3,4,5], defaultGoal: 'conditioning' }
+      },
+
+      templates: {
+        styrka: {
+          3: { name: 'Push/Pull/Legs (3x/vecka)', focus: 'Klassisk PPL – styrka och muskelmassa',
+               days: [{ day:'Måndag', muscle:'Bröst & Triceps', split:'Push' }, { day:'Onsdag', muscle:'Rygg & Biceps', split:'Pull' }, { day:'Fredag', muscle:'Ben & Core', split:'Legs' }] },
+          4: { name: 'Upper/Lower (4x/vecka)', focus: 'Optimal styrka och hypertrofi',
+               days: [{ day:'Måndag', muscle:'Överkropp Styrka', split:'Upper' }, { day:'Tisdag', muscle:'Underkropp Styrka', split:'Lower' }, { day:'Torsdag', muscle:'Överkropp Volym', split:'Upper' }, { day:'Lördag', muscle:'Underkropp Volym', split:'Lower' }] },
+          5: { name: 'PPL Split (5x/vecka)', focus: 'Avancerad hypertrofi',
+               days: [{ day:'Måndag', muscle:'Push (Styrka)', split:'Push' }, { day:'Tisdag', muscle:'Pull (Styrka)', split:'Pull' }, { day:'Onsdag', muscle:'Ben', split:'Legs' }, { day:'Torsdag', muscle:'Push (Volym)', split:'Push' }, { day:'Fredag', muscle:'Pull (Volym)', split:'Pull' }] },
+          6: { name: 'PPL Dubbel (6x/vecka)', focus: 'Hög volym – avancerat program',
+               days: [{ day:'Måndag', muscle:'Push A', split:'Push' }, { day:'Tisdag', muscle:'Pull A', split:'Pull' }, { day:'Onsdag', muscle:'Ben A', split:'Legs' }, { day:'Torsdag', muscle:'Push B', split:'Push' }, { day:'Fredag', muscle:'Pull B', split:'Pull' }, { day:'Lördag', muscle:'Ben B', split:'Legs' }] }
+        },
+        helkropp: {
+          2: { name: 'Helkropp A/B (2x/vecka)', focus: 'Perfekt för nybörjare eller aktiva dagar',
+               days: [{ day:'Måndag', muscle:'Helkropp A', split:'FullBodyA' }, { day:'Torsdag', muscle:'Helkropp B', split:'FullBodyB' }] },
+          3: { name: 'Helkropp A/B/C (3x/vecka)', focus: 'Varierande helkroppsträning',
+               days: [{ day:'Måndag', muscle:'Helkropp A', split:'FullBodyA' }, { day:'Onsdag', muscle:'Helkropp B', split:'FullBodyB' }, { day:'Fredag', muscle:'Helkropp C', split:'FullBodyC' }] }
+        },
+        kroppsvikt: {
+          3: { name: 'Kroppsvikt 3x/vecka', focus: 'Träna utan gym – full styrka',
+               days: [{ day:'Måndag', muscle:'Push', split:'BW_Push' }, { day:'Onsdag', muscle:'Underkropp', split:'BW_Lower' }, { day:'Fredag', muscle:'Pull & Core', split:'BW_Pull' }] },
+          4: { name: 'Kroppsvikt 4x/vecka', focus: 'Intensiv kroppsviktsträning',
+               days: [{ day:'Måndag', muscle:'Push', split:'BW_Push' }, { day:'Tisdag', muscle:'Pull', split:'BW_Pull' }, { day:'Torsdag', muscle:'Underkropp', split:'BW_Lower' }, { day:'Fredag', muscle:'Core & Circuit', split:'BW_Core' }] },
+          5: { name: 'Kroppsvikt 5x/vecka', focus: 'Daglig kroppsviktsträning med variation',
+               days: [{ day:'Måndag', muscle:'Push', split:'BW_Push' }, { day:'Tisdag', muscle:'Pull', split:'BW_Pull' }, { day:'Onsdag', muscle:'Underkropp', split:'BW_Lower' }, { day:'Torsdag', muscle:'Core', split:'BW_Core' }, { day:'Fredag', muscle:'Full Circuit', split:'BW_Circuit' }] }
+        },
+        powerlifting: {
+          3: { name: 'Powerlifting 3x/vecka', focus: 'Squat, Bänk, Marklyft – klassisk PLF',
+               days: [{ day:'Måndag', muscle:'Squat dag', split:'PL_Squat' }, { day:'Onsdag', muscle:'Bänkpress dag', split:'PL_Bench' }, { day:'Fredag', muscle:'Marklyft dag', split:'PL_Dead' }] },
+          4: { name: 'Powerlifting 4x/vecka', focus: 'Ökad frekvens på squat',
+               days: [{ day:'Måndag', muscle:'Squat A', split:'PL_Squat' }, { day:'Tisdag', muscle:'Bänkpress', split:'PL_Bench' }, { day:'Torsdag', muscle:'Marklyft', split:'PL_Dead' }, { day:'Lördag', muscle:'Squat B + Acc', split:'PL_SquatAcc' }] }
+        },
+        hiit: {
+          3: { name: 'HIIT 3x/vecka', focus: 'Maximal fettförbränning – 20-30 min',
+               days: [{ day:'Måndag', muscle:'HIIT Underkropp', split:'HIIT_Lower' }, { day:'Onsdag', muscle:'HIIT Överkropp', split:'HIIT_Upper' }, { day:'Fredag', muscle:'HIIT Helkropp', split:'HIIT_Full' }] },
+          4: { name: 'HIIT 4x/vecka', focus: 'Intensiv intervallträning',
+               days: [{ day:'Måndag', muscle:'HIIT Underkropp', split:'HIIT_Lower' }, { day:'Tisdag', muscle:'HIIT Överkropp', split:'HIIT_Upper' }, { day:'Torsdag', muscle:'HIIT Core', split:'HIIT_Core' }, { day:'Fredag', muscle:'HIIT Helkropp', split:'HIIT_Full' }] }
+        },
+        kondition: {
+          3: { name: 'Kondition 3x/vecka', focus: 'Intervall, tempo och distans',
+               days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Onsdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] },
+          4: { name: 'Kondition 4x/vecka', focus: 'Balanserat uthållighetsprogram',
+               days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] },
+          5: { name: 'Kondition 5x/vecka', focus: 'Ambitiöst löpprogram',
+               days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Lätt jogg', split:'Cardio_Easy' }, { day:'Onsdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] }
+        }
+      },
+
+      exercises: {
+        Push: [
+          { name: 'Bench Press', muscle: 'Chest', type: 'Barbell', sets: 4, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Incline Dumbbell Press', muscle: 'Chest', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Easy' },
+          { name: 'Chest Fly Machine', muscle: 'Chest', type: 'Machine', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Dumbbell Fly', muscle: 'Chest', type: 'Dumbbell', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Cable Chest Fly', muscle: 'Chest', type: 'Cable', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Overhead Press', muscle: 'Shoulders', type: 'Barbell', sets: 4, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Military Press', muscle: 'Shoulders', type: 'Barbell', sets: 4, reps: '5-6', difficulty: 'Hard' },
+          { name: 'Dumbbell Shoulder Press', muscle: 'Shoulders', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Easy' },
+          { name: 'Lateral Raise', muscle: 'Shoulders', type: 'Dumbbell', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Arnold Press', muscle: 'Shoulders', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Tricep Dips', muscle: 'Triceps', type: 'Bodyweight', sets: 3, reps: '8-12', difficulty: 'Medium' },
+          { name: 'Tricep Rope Pushdown', muscle: 'Triceps', type: 'Cable', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Skull Crushers', muscle: 'Triceps', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Medium' },
+          { name: 'Close-Grip Bench Press', muscle: 'Triceps', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' }
+        ],
+        Pull: [
+          { name: 'Deadlift', muscle: 'Back', type: 'Barbell', sets: 3, reps: '5-6', difficulty: 'Hard' },
+          { name: 'Barbell Rows', muscle: 'Back', type: 'Barbell', sets: 4, reps: '6-8', difficulty: 'Medium' },
+          { name: 'T-Bar Row', muscle: 'Back', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Pull-ups', muscle: 'Back', type: 'Bodyweight', sets: 3, reps: '6-10', difficulty: 'Medium' },
+          { name: 'Chin-ups', muscle: 'Back', type: 'Bodyweight', sets: 3, reps: '6-10', difficulty: 'Medium' },
+          { name: 'Lat Pulldown', muscle: 'Back', type: 'Machine', sets: 3, reps: '8-10', difficulty: 'Easy' },
+          { name: 'Seated Cable Row', muscle: 'Back', type: 'Cable', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Straight Arm Pulldown', muscle: 'Back', type: 'Cable', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Barbell Curl', muscle: 'Biceps', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Dumbbell Curl', muscle: 'Biceps', type: 'Dumbbell', sets: 3, reps: '8-12', difficulty: 'Easy' },
+          { name: 'Hammer Curls', muscle: 'Biceps', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Cable Bicep Curl', muscle: 'Biceps', type: 'Cable', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Face Pulls', muscle: 'Rear Delts', type: 'Cable', sets: 3, reps: '15-20', difficulty: 'Easy' }
+        ],
+        Legs: [
+          { name: 'Squats', muscle: 'Quads', type: 'Barbell', sets: 4, reps: '6-8', difficulty: 'Hard' },
+          { name: 'Leg Press', muscle: 'Quads', type: 'Machine', sets: 3, reps: '8-10', difficulty: 'Easy' },
+          { name: 'Hack Squat', muscle: 'Quads', type: 'Machine', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Goblet Squat', muscle: 'Quads', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Leg Extension', muscle: 'Quads', type: 'Machine', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Romanian Deadlift', muscle: 'Hamstrings', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Stiff-Leg Deadlift', muscle: 'Hamstrings', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Leg Curl', muscle: 'Hamstrings', type: 'Machine', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Hip Thrust', muscle: 'Glutes', type: 'Barbell', sets: 4, reps: '10-12', difficulty: 'Medium' },
+          { name: 'Walking Lunges', muscle: 'Quads', type: 'Dumbbell', sets: 3, reps: '12-15', difficulty: 'Medium' },
+          { name: 'Bulgarian Split Squat', muscle: 'Quads', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Leg Press Calf Raise', muscle: 'Calves', type: 'Machine', sets: 3, reps: '15-20', difficulty: 'Easy' },
+          { name: 'Standing Calf Raise', muscle: 'Calves', type: 'Bodyweight', sets: 4, reps: '15-20', difficulty: 'Easy' }
+        ],
+        FullBodyA: [
+          { name: 'Barbell Squat', muscle: 'Legs', type: 'Barbell', sets: 4, reps: '5-6', difficulty: 'Hard' },
+          { name: 'Bench Press', muscle: 'Chest', type: 'Barbell', sets: 4, reps: '5-6', difficulty: 'Medium' },
+          { name: 'Barbell Rows', muscle: 'Back', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Overhead Press', muscle: 'Shoulders', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Romanian Deadlift', muscle: 'Hamstrings', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Pull-ups', muscle: 'Back', type: 'Bodyweight', sets: 3, reps: '6-10', difficulty: 'Medium' }
+        ],
+        FullBodyB: [
+          { name: 'Front Squat', muscle: 'Quads', type: 'Barbell', sets: 4, reps: '6-8', difficulty: 'Hard' },
+          { name: 'Incline Bench Press', muscle: 'Chest', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Seated Cable Row', muscle: 'Back', type: 'Cable', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Dumbbell Shoulder Press', muscle: 'Shoulders', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Easy' },
+          { name: 'Leg Press', muscle: 'Quads', type: 'Machine', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Dumbbell Row', muscle: 'Back', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Easy' }
+        ],
+        FullBodyC: [
+          { name: 'Bulgarian Split Squat', muscle: 'Quads', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Dumbbell Bench Press', muscle: 'Chest', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Easy' },
+          { name: 'Single-Arm Row', muscle: 'Back', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Arnold Press', muscle: 'Shoulders', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Medium' },
+          { name: 'Walking Lunges', muscle: 'Quads', type: 'Dumbbell', sets: 3, reps: '12-15', difficulty: 'Medium' },
+          { name: 'Lat Pulldown', muscle: 'Back', type: 'Machine', sets: 3, reps: '10-12', difficulty: 'Easy' }
+        ],
+        BW_Push: [
+          { name: 'Push-ups', muscle: 'Chest', type: 'Bodyweight', sets: 4, reps: '10-15', difficulty: 'Easy' },
+          { name: 'Wide Push-ups', muscle: 'Chest', type: 'Bodyweight', sets: 3, reps: '10-15', difficulty: 'Easy' },
+          { name: 'Diamond Push-ups', muscle: 'Triceps', type: 'Bodyweight', sets: 3, reps: '8-12', difficulty: 'Medium' },
+          { name: 'Pike Push-ups', muscle: 'Shoulders', type: 'Bodyweight', sets: 3, reps: '8-12', difficulty: 'Medium' },
+          { name: 'Decline Push-ups', muscle: 'Chest', type: 'Bodyweight', sets: 3, reps: '10-15', difficulty: 'Medium' },
+          { name: 'Tricep Dips', muscle: 'Triceps', type: 'Bodyweight', sets: 3, reps: '8-12', difficulty: 'Medium' }
+        ],
+        BW_Pull: [
+          { name: 'Pull-ups', muscle: 'Back', type: 'Bodyweight', sets: 4, reps: '4-8', difficulty: 'Hard' },
+          { name: 'Chin-ups', muscle: 'Biceps', type: 'Bodyweight', sets: 3, reps: '4-8', difficulty: 'Hard' },
+          { name: 'Inverted Rows', muscle: 'Back', type: 'Bodyweight', sets: 3, reps: '8-12', difficulty: 'Medium' },
+          { name: 'Negative Pull-ups', muscle: 'Back', type: 'Bodyweight', sets: 3, reps: '5-8', difficulty: 'Medium' },
+          { name: 'Scapular Pull-ups', muscle: 'Back', type: 'Bodyweight', sets: 3, reps: '10-15', difficulty: 'Easy' },
+          { name: 'Australian Pull-ups', muscle: 'Back', type: 'Bodyweight', sets: 3, reps: '8-12', difficulty: 'Medium' }
+        ],
+        BW_Lower: [
+          { name: 'Bodyweight Squats', muscle: 'Quads', type: 'Bodyweight', sets: 4, reps: '15-20', difficulty: 'Easy' },
+          { name: 'Jump Squats', muscle: 'Quads', type: 'Bodyweight', sets: 3, reps: '10-15', difficulty: 'Medium' },
+          { name: 'Bulgarian Split Squat', muscle: 'Quads', type: 'Bodyweight', sets: 3, reps: '10-12', difficulty: 'Medium' },
+          { name: 'Glute Bridge', muscle: 'Glutes', type: 'Bodyweight', sets: 4, reps: '15-20', difficulty: 'Easy' },
+          { name: 'Walking Lunges', muscle: 'Quads', type: 'Bodyweight', sets: 3, reps: '12-16', difficulty: 'Medium' },
+          { name: 'Wall Sit', muscle: 'Quads', type: 'Bodyweight', sets: 3, reps: '30-60s', difficulty: 'Medium' },
+          { name: 'Step-ups', muscle: 'Quads', type: 'Bodyweight', sets: 3, reps: '12-15', difficulty: 'Easy' }
+        ],
+        BW_Core: [
+          { name: 'Plank', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '30-60s', difficulty: 'Easy' },
+          { name: 'Crunches', muscle: 'Abs', type: 'Bodyweight', sets: 3, reps: '15-20', difficulty: 'Easy' },
+          { name: 'Bicycle Crunches', muscle: 'Abs', type: 'Bodyweight', sets: 3, reps: '15-20', difficulty: 'Easy' },
+          { name: 'Mountain Climbers', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '20-30', difficulty: 'Medium' },
+          { name: 'Leg Raises', muscle: 'Abs', type: 'Bodyweight', sets: 3, reps: '12-15', difficulty: 'Medium' },
+          { name: 'Russian Twists', muscle: 'Abs', type: 'Bodyweight', sets: 3, reps: '15-20', difficulty: 'Easy' },
+          { name: 'Dead Bug', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '10-12', difficulty: 'Medium' }
+        ],
+        BW_Circuit: [
+          { name: 'Burpees', muscle: 'Full Body', type: 'Bodyweight', sets: 4, reps: '8-12', difficulty: 'Hard' },
+          { name: 'Jump Squats', muscle: 'Legs', type: 'Bodyweight', sets: 3, reps: '15', difficulty: 'Medium' },
+          { name: 'Push-ups', muscle: 'Chest', type: 'Bodyweight', sets: 3, reps: '15', difficulty: 'Easy' },
+          { name: 'Mountain Climbers', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '20', difficulty: 'Medium' },
+          { name: 'High Knees', muscle: 'Legs', type: 'Bodyweight', sets: 3, reps: '30s', difficulty: 'Medium' },
+          { name: 'Jump Lunges', muscle: 'Legs', type: 'Bodyweight', sets: 3, reps: '10-12', difficulty: 'Hard' },
+          { name: 'Jumping Jacks', muscle: 'Full Body', type: 'Bodyweight', sets: 3, reps: '30s', difficulty: 'Easy' }
+        ],
+        PL_Squat: [
+          { name: 'Barbell Squat', muscle: 'Quads', type: 'Barbell', sets: 5, reps: '3-5', difficulty: 'Hard' },
+          { name: 'Box Squat', muscle: 'Quads', type: 'Barbell', sets: 4, reps: '3-5', difficulty: 'Hard' },
+          { name: 'Pause Squat', muscle: 'Quads', type: 'Barbell', sets: 3, reps: '3', difficulty: 'Hard' },
+          { name: 'Front Squat', muscle: 'Quads', type: 'Barbell', sets: 3, reps: '4-6', difficulty: 'Hard' },
+          { name: 'Leg Press', muscle: 'Quads', type: 'Machine', sets: 3, reps: '8-10', difficulty: 'Easy' }
+        ],
+        PL_Bench: [
+          { name: 'Barbell Bench Press', muscle: 'Chest', type: 'Barbell', sets: 5, reps: '3-5', difficulty: 'Hard' },
+          { name: 'Pause Bench Press', muscle: 'Chest', type: 'Barbell', sets: 3, reps: '3', difficulty: 'Hard' },
+          { name: 'Close-Grip Bench Press', muscle: 'Triceps', type: 'Barbell', sets: 3, reps: '5-8', difficulty: 'Medium' },
+          { name: 'Dumbbell Fly', muscle: 'Chest', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Tricep Rope Pushdown', muscle: 'Triceps', type: 'Cable', sets: 3, reps: '10-15', difficulty: 'Easy' }
+        ],
+        PL_Dead: [
+          { name: 'Deadlift', muscle: 'Back', type: 'Barbell', sets: 5, reps: '3-5', difficulty: 'Hard' },
+          { name: 'Romanian Deadlift', muscle: 'Hamstrings', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Deficit Deadlift', muscle: 'Back', type: 'Barbell', sets: 3, reps: '3-5', difficulty: 'Hard' },
+          { name: 'Sumo Deadlift', muscle: 'Back', type: 'Barbell', sets: 3, reps: '3-5', difficulty: 'Hard' },
+          { name: 'Good Mornings', muscle: 'Hamstrings', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' }
+        ],
+        PL_SquatAcc: [
+          { name: 'Barbell Squat', muscle: 'Quads', type: 'Barbell', sets: 4, reps: '5-8', difficulty: 'Hard' },
+          { name: 'Hack Squat', muscle: 'Quads', type: 'Machine', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Leg Press', muscle: 'Quads', type: 'Machine', sets: 3, reps: '10-12', difficulty: 'Easy' },
+          { name: 'Leg Extension', muscle: 'Quads', type: 'Machine', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Standing Calf Raise', muscle: 'Calves', type: 'Bodyweight', sets: 4, reps: '15-20', difficulty: 'Easy' }
+        ],
+        HIIT_Lower: [
+          { name: 'Jump Squats', muscle: 'Legs', type: 'Bodyweight', sets: 6, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Burpee + Jump', muscle: 'Full Body', type: 'Bodyweight', sets: 5, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Jump Lunges', muscle: 'Legs', type: 'Bodyweight', sets: 5, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Box Jumps', muscle: 'Legs', type: 'Bodyweight', sets: 4, reps: '10', difficulty: 'Medium' },
+          { name: 'Speed Squats', muscle: 'Quads', type: 'Bodyweight', sets: 5, reps: '30s', difficulty: 'Medium' },
+          { name: 'Sprint Intervals', muscle: 'Full Body', type: 'Bodyweight', sets: 8, reps: '30s', difficulty: 'Hard' }
+        ],
+        HIIT_Upper: [
+          { name: 'Plyometric Push-ups', muscle: 'Chest', type: 'Bodyweight', sets: 5, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Medicine Ball Slams', muscle: 'Full Body', type: 'Bodyweight', sets: 5, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Battle Rope Waves', muscle: 'Shoulders', type: 'Bodyweight', sets: 5, reps: '30s', difficulty: 'Hard' },
+          { name: 'Burpee Push-up', muscle: 'Full Body', type: 'Bodyweight', sets: 5, reps: '15', difficulty: 'Hard' },
+          { name: 'Fast Mountain Climbers', muscle: 'Core', type: 'Bodyweight', sets: 5, reps: '30s', difficulty: 'Medium' },
+          { name: 'Explosive Rows', muscle: 'Back', type: 'Bodyweight', sets: 4, reps: '20s on/10s off', difficulty: 'Hard' }
+        ],
+        HIIT_Core: [
+          { name: 'Mountain Climbers', muscle: 'Core', type: 'Bodyweight', sets: 5, reps: '30s', difficulty: 'Medium' },
+          { name: 'Plank Jacks', muscle: 'Core', type: 'Bodyweight', sets: 4, reps: '30s', difficulty: 'Medium' },
+          { name: 'V-Ups', muscle: 'Abs', type: 'Bodyweight', sets: 4, reps: '15-20', difficulty: 'Hard' },
+          { name: 'Bicycle Crunches', muscle: 'Abs', type: 'Bodyweight', sets: 4, reps: '30s', difficulty: 'Medium' },
+          { name: 'Russian Twists', muscle: 'Abs', type: 'Bodyweight', sets: 4, reps: '30s', difficulty: 'Easy' },
+          { name: 'Hollow Body Hold', muscle: 'Core', type: 'Bodyweight', sets: 4, reps: '20-30s', difficulty: 'Hard' }
+        ],
+        HIIT_Full: [
+          { name: 'Burpees', muscle: 'Full Body', type: 'Bodyweight', sets: 6, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Jump Squats', muscle: 'Legs', type: 'Bodyweight', sets: 5, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Push-ups', muscle: 'Chest', type: 'Bodyweight', sets: 5, reps: '20s on/10s off', difficulty: 'Medium' },
+          { name: 'High Knees', muscle: 'Full Body', type: 'Bodyweight', sets: 5, reps: '30s', difficulty: 'Medium' },
+          { name: 'Jump Lunges', muscle: 'Legs', type: 'Bodyweight', sets: 5, reps: '20s on/10s off', difficulty: 'Hard' },
+          { name: 'Plank to Push-up', muscle: 'Core', type: 'Bodyweight', sets: 4, reps: '10-12', difficulty: 'Medium' }
+        ],
+        Cardio_Interval: [
+          { name: 'Sprint Intervals', muscle: 'Kondition', type: 'Cardio', sets: 8, reps: '30s sprint/30s vila', difficulty: 'Hard' },
+          { name: '400m Repeats', muscle: 'Kondition', type: 'Cardio', sets: 5, reps: '400m / 2 min vila', difficulty: 'Hard' },
+          { name: 'Pyramid Intervals', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '200/400/600/400/200m', difficulty: 'Hard' },
+          { name: 'Fartlek Run', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '30 min', difficulty: 'Medium' },
+          { name: 'Tempo-intervaller', muscle: 'Kondition', type: 'Cardio', sets: 4, reps: '4 min / 2 min vila', difficulty: 'Hard' }
+        ],
+        Cardio_Tempo: [
+          { name: 'Tempolopp', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '20-30 min', difficulty: 'Medium' },
+          { name: 'Tröskelkörning', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '25 min', difficulty: 'Hard' },
+          { name: 'Cruise Intervals', muscle: 'Kondition', type: 'Cardio', sets: 4, reps: '1 km / 1 min vila', difficulty: 'Medium' },
+          { name: 'Progressionslopp', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '20 min ökande tempo', difficulty: 'Medium' },
+          { name: 'Tävlingstempokörning', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '25 min', difficulty: 'Hard' }
+        ],
+        Cardio_Strength: [
+          { name: 'Backsprints', muscle: 'Kondition', type: 'Cardio', sets: 10, reps: '30s uppför / gå ned', difficulty: 'Hard' },
+          { name: 'Trappklättring', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '10-15 min', difficulty: 'Medium' },
+          { name: 'Cykelintervaller', muscle: 'Kondition', type: 'Cardio', sets: 6, reps: '1 min / 1 min vila', difficulty: 'Hard' },
+          { name: 'Roddmaskin', muscle: 'Kondition', type: 'Cardio', sets: 4, reps: '500m', difficulty: 'Medium' },
+          { name: 'Hopprep', muscle: 'Kondition', type: 'Cardio', sets: 5, reps: '3 min / 1 min vila', difficulty: 'Medium' }
+        ],
+        Cardio_Long: [
+          { name: 'Distanslopp', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '45-60 min', difficulty: 'Easy' },
+          { name: 'Lätt cykling', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '60 min', difficulty: 'Easy' },
+          { name: 'Powerwalk', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '45 min', difficulty: 'Easy' },
+          { name: 'Elliptical', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '40 min', difficulty: 'Easy' },
+          { name: 'Simning', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '30 min', difficulty: 'Medium' }
+        ],
+        Cardio_Easy: [
+          { name: 'Lätt jogg', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '20-30 min', difficulty: 'Easy' },
+          { name: 'Rask promenad', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '30 min', difficulty: 'Easy' },
+          { name: 'Lätt cykling', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '20 min', difficulty: 'Easy' },
+          { name: 'Återhämtningsjogg', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '20 min', difficulty: 'Easy' },
+          { name: 'Promenad + stretching', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '30 min', difficulty: 'Easy' }
+        ]
+      },
+
+      getExercises(split, count = 5) {
+        let exList;
+        if (split === 'Upper') {
+          exList = [...(this.exercises.Push || []), ...(this.exercises.Pull || [])];
+        } else if (split === 'Lower') {
+          exList = [...(this.exercises.Legs || [])];
+        } else {
+          exList = this.exercises[split] || [];
+        }
+        const shuffled = [...exList].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, Math.min(count, exList.length));
+      },
+
+      getTemplate(programType, daysPerWeek) {
+        const typeTemplates = this.templates[programType];
+        if (!typeTemplates) return this.templates.styrka[3];
+        return typeTemplates[daysPerWeek] || typeTemplates[Object.keys(typeTemplates)[0]];
+      },
+
+      createProgram(daysPerWeek, name, weeks = 8, goal = 'hypertrophy', programType = 'styrka') {
+        const template = this.getTemplate(programType, daysPerWeek);
+        const isCardio = ['hiit', 'kondition'].includes(programType);
+        const exCount = isCardio ? 5 : (daysPerWeek <= 3 ? 4 : 5);
+
+        const schedule = template.days.map(day => ({
+          day: day.day,
+          muscle: day.muscle,
+          split: day.split,
+          exercises: this.getExercises(day.split, exCount)
+        }));
+
+        return {
+          id: Date.now(),
+          name,
+          weeks,
+          daysPerWeek,
+          programType,
+          type: template.name,
+          focus: template.focus,
+          schedule,
+          created: new Date().toISOString(),
+          goal,
+          currentWeek: 1,
+          currentRetry: 0,
+          currentDayInWeek: 0,
+          weekHistory: []
+        };
+      },
+
+      async loadAPIExercises() {
+        const CACHE_KEY = 'gordito_wger';
+        const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+        try {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (Date.now() - timestamp < CACHE_TTL) { this._mergeAPI(data); return; }
+          }
+        } catch (e) {}
+        try {
+          const res = await fetch('https://wger.de/api/v2/exercise/?format=json&language=2&limit=100');
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const json = await res.json();
+          const data = json.results || [];
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+          this._mergeAPI(data);
+        } catch (e) { /* Use built-in exercises */ }
+      },
+
+      _mergeAPI(exercises) {
+        const catMap = { 11: 'Push', 13: 'Push', 12: 'Pull', 8: 'Pull', 9: 'Legs', 14: 'Legs', 10: 'BW_Core' };
+        const eqMap = { 1: 'Barbell', 3: 'Dumbbell', 7: 'Bodyweight', 10: 'Kettlebell' };
+        exercises.forEach(ex => {
+          if (!ex.name || ex.name.length < 3) return;
+          const target = catMap[ex.category];
+          if (!target || !this.exercises[target]) return;
+          if (this.exercises[target].find(e => e.name.toLowerCase() === ex.name.toLowerCase())) return;
+          const eq = (ex.equipment && ex.equipment.length) ? (eqMap[ex.equipment[0]] || 'Other') : 'Bodyweight';
+          const muscleName = [12,8].includes(ex.category) ? 'Back' : [9,14].includes(ex.category) ? 'Legs' : ex.category === 10 ? 'Core' : 'Chest';
+          this.exercises[target].push({ name: ex.name, muscle: muscleName, type: eq, sets: 3, reps: '8-12', difficulty: 'Medium', source: 'wger' });
+        });
+      }
+    };
+
+    // ===== PROGRESSION ENGINE =====
+    const ProgressionEngine = {
+      GOALS: {
+        strength:     { sessionThreshold: 0.90, passRate: 0.85, repeatRate: 0.70 },
+        hypertrophy:  { sessionThreshold: 0.85, passRate: 0.85, repeatRate: 0.70 },
+        conditioning: { sessionThreshold: 0.90, passRate: 0.85, repeatRate: 0.70 }
+      },
+
+      cfg(goal) {
+        return this.GOALS[goal] || this.GOALS.hypertrophy;
+      },
+
+      // 0-1 completion for one session
+      calcCompletion(exercises) {
+        if (!exercises || !exercises.length) return 1;
+        const pcts = exercises.map(ex => {
+          const done = (ex.completed || []).length;
+          return Math.min(done / (ex.sets || 1), 1);
+        });
+        return pcts.reduce((a, b) => a + b, 0) / pcts.length;
+      },
+
+      sessionPassed(exercises, goal) {
+        return this.calcCompletion(exercises) >= this.cfg(goal).sessionThreshold;
+      },
+
+      // 'progress' | 'repeat' | 'deload'
+      weekDecision(passedCount, totalCount, goal) {
+        const rate = passedCount / Math.max(totalCount, 1);
+        const cfg = this.cfg(goal);
+        if (rate >= cfg.passRate) return 'progress';
+        if (rate >= cfg.repeatRate) return 'repeat';
+        return 'deload';
+      },
+
+      // Apply increment to all exercises in a schedule day
+      applyIncrement(exercises, goal) {
+        return exercises.map(ex => {
+          const e = { ...ex };
+          const w = parseFloat(e.weight) || 0;
+          if (goal === 'strength') {
+            if (w > 0) e.weight = w + 2.5;
+          } else if (goal === 'hypertrophy') {
+            if (e.sets < 5) e.sets = e.sets + 1;
+            else if (w > 0) e.weight = w + 2.5;
+          }
+          return e;
+        });
+      },
+
+      applyDeload(exercises) {
+        return exercises.map(ex => {
+          const e = { ...ex };
+          e.sets = Math.max(2, Math.floor(e.sets * 0.8));
+          const w = parseFloat(e.weight) || 0;
+          if (w > 0) e.weight = Math.round(w * 0.85 * 4) / 4;
+          return e;
+        });
+      },
+
+      // Get current week entry (or create if missing)
+      getCurrentWeekEntry(program) {
+        let entry = program.weekHistory.find(
+          w => w.week === program.currentWeek && w.retry === program.currentRetry && !w.decision
+        );
+        if (!entry) {
+          entry = { week: program.currentWeek, retry: program.currentRetry, sessions: [], decision: null };
+          program.weekHistory.push(entry);
+        }
+        return entry;
+      },
+
+      // Returns { decision, weekComplete, passedCount, totalCount }
+      // Does NOT apply progression yet — deferred to next startWorkout so override is safe
+      addSession(program, sessionData) {
+        const entry = this.getCurrentWeekEntry(program);
+        entry.sessions.push(sessionData);
+        program.currentDayInWeek++;
+
+        if (program.currentDayInWeek >= program.daysPerWeek) {
+          program.currentDayInWeek = 0;
+          const passedCount = entry.sessions.filter(s => s.passed).length;
+          const totalCount = entry.sessions.length;
+          const decision = this.weekDecision(passedCount, totalCount, program.goal);
+          entry.decision = decision;
+          entry.pending = true; // progression applied on next startWorkout
+          return { decision, weekComplete: true, passedCount, totalCount };
+        }
+        return { decision: null, weekComplete: false };
+      },
+
+      // Apply a week decision to the program (exercises + counters)
+      applyWeekDecision(program, decision) {
+        if (decision === 'progress') {
+          program.schedule.forEach(day => {
+            day.exercises = this.applyIncrement(day.exercises, program.goal);
+          });
+          program.currentWeek++;
+          program.currentRetry = 0;
+        } else if (decision === 'repeat') {
+          program.currentRetry++;
+        } else {
+          program.schedule.forEach(day => {
+            day.exercises = this.applyDeload(day.exercises);
+          });
+          program.currentWeek++;
+          program.currentRetry = 0;
+        }
+      }
+    };
+
+    // ===== MAIN APP =====
+    const app = {
+      state: {
+        currentView: 'dashboard',
+        userName: 'Tränaren',
+        programs: [],
+        currentWorkout: null,
+        workoutHistory: [],
+        lastSessionResult: null
+      },
+
+      init() {
+        const saved = localStorage.getItem('familyfit_state');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            // Merge saved state, keeping defaults for new fields
+            this.state = { ...this.state, ...parsed };
+          } catch (e) {}
+        }
+        // Never reload into mid-session views
+        if (this.state.currentView === 'sessionResult' || this.state.currentView === 'workout') {
+          this.state.currentView = 'dashboard';
+        }
+        this.render();
+        WorkoutLibrary.loadAPIExercises().catch(() => {});
+      },
+
+      save() {
+        localStorage.setItem('familyfit_state', JSON.stringify(this.state));
+      },
+
+      setView(view) {
+        this.state.currentView = view;
+        this.render();
+      },
+
+      showToast(msg, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = msg;
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      },
+
+      render() {
+        document.getElementById('bottomNav').classList.remove('hidden');
+
+        let html = '';
+        switch (this.state.currentView) {
+          case 'dashboard': html = this.renderDashboard(); break;
+          case 'programs': html = this.renderPrograms(); break;
+          case 'createProgram': html = this.renderCreateProgram(); break;
+          case 'editProgram': html = this.renderEditProgram(); break;
+          case 'history': html = this.renderHistory(); break;
+          case 'workout': html = this.renderWorkout(); break;
+          case 'sessionResult': html = this.renderSessionResult(); break;
+          case 'programComplete': html = this.renderProgramComplete(); break;
+          case 'more': html = this.renderMore(); break;
+          default: html = this.renderDashboard();
+        }
+
+        document.getElementById('content').innerHTML = html;
+        this.updateNav();
+      },
+
+      updateNav() {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const views = ['dashboard', 'programs', 'history', 'more'];
+        const idx = views.indexOf(this.state.currentView);
+        if (idx >= 0) {
+          document.querySelectorAll('.nav-item')[idx].classList.add('active');
+        }
+      },
+
+      // ===== DASHBOARD =====
+      renderDashboard() {
+        let html = '<h2>Välkommen, ' + (this.state.userName || 'Tränaren') + '!</h2>';
+
+        let activeProgram = this.state.programs.find(p => p.active);
+        if (!activeProgram && this.state.programs.length > 0) activeProgram = this.state.programs[0];
+
+        if (activeProgram) {
+          const dayIdx = (activeProgram.currentDayInWeek || 0) % activeProgram.schedule.length;
+          const nextDay = activeProgram.schedule[dayIdx];
+          const goalLabels = { strength: '💪 Styrka', hypertrophy: '🏋️ Hypertrofi', conditioning: '🏃 Kondition' };
+          const goal = activeProgram.goal || 'hypertrophy';
+          const currentWeek = activeProgram.currentWeek || 1;
+          const sessionInWeek = activeProgram.currentDayInWeek || 0;
+          const daysPerWeek = activeProgram.daysPerWeek;
+
+          html += '<button class="btn-primary" onclick="app.startWorkout()">▶ Starta träning</button>';
+
+          // Week progress bar
+          html += '<div class="card" style="margin:1rem 0;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">';
+          const ptIcon = (WorkoutLibrary.programTypes[activeProgram.programType] || {}).icon || '🏋️';
+          html += '<div><h4 style="margin:0;">' + ptIcon + ' ' + activeProgram.name + '</h4>';
+          html += '<p style="color:var(--text-muted);font-size:0.82rem;margin:0.25rem 0 0;">Vecka ' + currentWeek + '/' + activeProgram.weeks + ' · ' + (goalLabels[goal] || goal) + '</p></div>';
+          html += '<div style="text-align:right;font-size:0.85rem;color:var(--text-muted);">' + sessionInWeek + '/' + daysPerWeek + ' pass</div>';
+          html += '</div>';
+
+          // Week session icons from weekHistory
+          const currentEntry = (activeProgram.weekHistory || []).find(
+            w => w.week === currentWeek && w.retry === (activeProgram.currentRetry || 0) && !w.decision
+          );
+          html += '<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">';
+          const doneSessions = currentEntry ? currentEntry.sessions : [];
+          doneSessions.forEach(s => { html += '<span style="font-size:1.4rem;">' + (s.passed ? '✅' : '⚠️') + '</span>'; });
+          for (let i = doneSessions.length; i < daysPerWeek; i++) { html += '<span style="font-size:1.4rem;">⬜</span>'; }
+          html += '</div>';
+
+          // Progress bar
+          const pct = Math.round((sessionInWeek / daysPerWeek) * 100);
+          html += '<div style="background:#0f1419;border-radius:0.5rem;height:6px;overflow:hidden;">';
+          html += '<div style="width:' + pct + '%;height:100%;background:var(--primary);border-radius:0.5rem;"></div>';
+          html += '</div>';
+
+          // Next session info
+          html += '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #334155;">';
+          html += '<p style="font-size:0.85rem;color:var(--text-muted);">Nästa pass: <strong style="color:#fff;">' + nextDay.day + ' – ' + nextDay.muscle + '</strong></p>';
+          html += '<div style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.35rem;">';
+          nextDay.exercises.forEach(ex => {
+            html += '<span style="background:#0f1419;border-radius:0.3rem;padding:0.25rem 0.5rem;font-size:0.75rem;color:var(--text-muted);">';
+            html += ex.name + ' ' + ex.sets + '×' + ex.reps + (ex.weight ? ' @ ' + ex.weight + 'kg' : '');
+            html += '</span>';
+          });
+          html += '</div></div></div>';
+
+          // 4-week arc from weekHistory
+          const weekHistory = activeProgram.weekHistory || [];
+          const completedWeeks = weekHistory.filter(w => w.decision);
+          if (completedWeeks.length > 0) {
+            html += '<h3 style="margin:1.5rem 0 0.75rem;">Veckoöversikt</h3>';
+            html += '<div class="card" style="overflow-x:auto;">';
+            html += '<div style="display:flex;gap:0.5rem;min-width:max-content;">';
+            completedWeeks.slice(-6).forEach(w => {
+              const passedCount = w.sessions.filter(s => s.passed).length;
+              const total = w.sessions.length;
+              const dLabel = { progress: { icon: '✅', color: 'var(--primary)' }, repeat: { icon: '⚠️', color: 'var(--accent)' }, deload: { icon: '🔄', color: 'var(--secondary)' } };
+              const d = dLabel[w.decision] || { icon: '?', color: 'var(--text-muted)' };
+              const label = w.retry > 0 ? 'V' + w.week + ' (rep)' : 'V' + w.week;
+              html += '<div style="text-align:center;min-width:56px;">';
+              html += '<div style="font-size:1.5rem;">' + d.icon + '</div>';
+              html += '<div style="font-size:0.7rem;color:' + d.color + ';font-weight:700;">' + label + '</div>';
+              html += '<div style="font-size:0.68rem;color:var(--text-muted);">' + passedCount + '/' + total + '</div>';
+              html += '</div>';
+            });
+            html += '</div></div>';
+          }
+
+        } else {
+          html += '<div class="card"><p class="text-muted">Inget program valt. Skapa eller välj ett program.</p>';
+          html += '<button class="btn-primary" onclick="app.setView(\'programs\')">Gå till program</button></div>';
+        }
+
+        html += '<h3>Statistik</h3>';
+        html += '<div class="grid-2">';
+        html += '<div class="stat-card"><div class="text-muted">Träningar</div><div class="stat-value">' + this.state.workoutHistory.length + '</div></div>';
+        const passedAll = this.state.workoutHistory.filter(w => w.passed).length;
+        html += '<div class="stat-card"><div class="text-muted">Pass godkända</div><div class="stat-value">' + passedAll + '</div></div>';
+        html += '</div>';
+
+        if (this.state.workoutHistory.length > 0) {
+          html += '<h3>Senaste träning</h3>';
+          const last = this.state.workoutHistory[this.state.workoutHistory.length - 1];
+          html += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;">';
+          html += '<div><p><strong>' + last.day + '</strong></p>';
+          html += '<p class="text-muted">' + new Date(last.date).toLocaleDateString('sv-SE') + '</p></div>';
+          html += '<div style="text-align:right;">';
+          html += '<div style="font-size:1.5rem;">' + (last.passed ? '✅' : '⚠️') + '</div>';
+          if (last.completionPct !== undefined) html += '<div style="font-size:0.8rem;color:var(--text-muted);">' + last.completionPct + '%</div>';
+          html += '</div></div>';
+        }
+
+        return html;
+      },
+
+      // ===== PROGRAMS =====
+      renderPrograms() {
+        let html = '<h2>Träningsprogram</h2>';
+        html += '<button class="btn-primary" onclick="app.setView(\'createProgram\')">+ Skapa nytt program</button>';
+        
+        if (this.state.programs.length === 0) {
+          html += '<div class="card"><p class="text-muted">Inget program skapat ännu. Börja med att skapa ett!</p></div>';
+        } else {
+          this.state.programs.forEach((prog, idx) => {
+            html += '<div class="program-card" onclick="app.selectProgram(' + idx + ')">';
+            html += '<div style="display: flex; justify-content: space-between; align-items: start;">';
+            html += '<div>';
+            const ptIcon = (WorkoutLibrary.programTypes[prog.programType] || {}).icon || '🏋️';
+            html += '<h4 style="margin: 0;">' + ptIcon + ' ' + prog.name + '</h4>';
+            html += '<p class="text-muted">' + prog.weeks + ' veckor • ' + prog.daysPerWeek + ' dagar/vecka</p>';
+            html += '<p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">' + prog.type + '</p>';
+            html += '<p style="color: var(--primary); margin-top: 0.5rem; font-size: 0.9rem;">Dagar: ' + prog.schedule.length + '</p>';
+            html += '</div>';
+            html += '<div style="text-align: right;">';
+            html += '<button onclick="event.stopPropagation(); app.editProgramView(' + idx + ')" class="btn-secondary btn-small">Redigera</button>';
+            html += '<button onclick="event.stopPropagation(); app.deleteProgram(' + idx + ')" class="btn-danger btn-small" style="margin-top: 0.5rem;">Radera</button>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+          });
+        }
+
+        return html;
+      },
+
+      renderCreateProgram() {
+        const selType = sessionStorage.getItem('selectedProgramType') || '';
+        const selDays = sessionStorage.getItem('selectedDays') || '';
+
+        let html = '<button class="btn-secondary" onclick="app.setView(\'programs\')">← Tillbaka</button>';
+        html += '<h2>Skapa träningsprogram</h2>';
+
+        html += '<h3 style="margin:1rem 0 0.75rem;">1. Välj typ av träning</h3>';
+        html += '<div class="grid-2">';
+        Object.entries(WorkoutLibrary.programTypes).forEach(([key, pt]) => {
+          const active = key === selType;
+          html += '<div onclick="app.selectProgramType(\'' + key + '\')" style="background:' + (active ? 'rgba(16,185,129,0.15)' : 'var(--card-bg)') + ';border:2px solid ' + (active ? 'var(--primary)' : '#333') + ';border-radius:0.75rem;padding:1rem;cursor:pointer;transition:0.2s;">';
+          html += '<div style="font-size:1.8rem;margin-bottom:0.25rem;">' + pt.icon + '</div>';
+          html += '<div style="font-weight:700;font-size:0.92rem;">' + pt.name + '</div>';
+          html += '<div style="color:var(--text-muted);font-size:0.76rem;margin-top:0.2rem;">' + pt.desc + '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+
+        if (selType) {
+          const pt = WorkoutLibrary.programTypes[selType];
+          html += '<h3 style="margin:1.25rem 0 0.75rem;">2. Dagar per vecka</h3>';
+          html += '<div class="tab-buttons">';
+          pt.days.forEach(d => {
+            html += '<button class="tab-btn' + (selDays == d ? ' active' : '') + '" onclick="app.selectDays(' + d + ')">' + d + ' dagar</button>';
+          });
+          html += '</div>';
+
+          if (selDays) {
+            const tpl = WorkoutLibrary.getTemplate(selType, parseInt(selDays));
+            html += '<div style="background:rgba(16,185,129,0.1);padding:0.75rem 1rem;border-radius:0.5rem;margin:0.75rem 0;">';
+            html += '<strong>' + tpl.name + '</strong><br>';
+            html += '<span style="color:var(--text-muted);font-size:0.83rem;">' + tpl.focus + '</span>';
+            html += '</div>';
+          }
+
+          html += '<div class="card" style="margin-top:1rem;">';
+          html += '<h3 style="margin-top:0;">3. Detaljer</h3>';
+          html += '<label>Programnamn</label>';
+          html += '<input type="text" id="progName" placeholder="T.ex. Sommar Styrka 2025">';
+          html += '<label>Antal veckor</label>';
+          html += '<input type="number" id="progWeeks" value="8" min="4" max="24">';
+          html += '<label>Träningsmål</label>';
+          html += '<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:0.5rem 0 1rem;">';
+          [{ v:'strength', l:'💪 Styrka' }, { v:'hypertrophy', l:'🏋️ Hypertrofi' }, { v:'conditioning', l:'🏃 Kondition' }].forEach(g => {
+            const checked = g.v === pt.defaultGoal ? ' checked' : '';
+            html += '<label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:#fff;"><input type="radio" name="goal" value="' + g.v + '"' + checked + '> ' + g.l + '</label>';
+          });
+          html += '</div>';
+          html += '<button class="btn-primary" onclick="app.createProgram()">Skapa program</button>';
+          html += '</div>';
+        }
+
+        return html;
+      },
+
+      renderEditProgram() {
+        const selProgIdx = sessionStorage.getItem('selectedProgIdx');
+        if (!selProgIdx) return '<h2>Program inte valt</h2>';
+        
+        const prog = this.state.programs[parseInt(selProgIdx)];
+        if (!prog) return '<h2>Program inte funnet</h2>';
+
+        let html = '<button class="btn-secondary" onclick="app.setView(\'programs\')">← Tillbaka</button>';
+        html += '<h2>Redigera: ' + prog.name + '</h2>';
+        
+        html += '<div class="card">';
+        html += '<label>Programnamn</label>';
+        html += '<input type="text" id="editProgName" value="' + prog.name + '">';
+        
+        html += '<label>Veckor</label>';
+        html += '<input type="number" id="editProgWeeks" value="' + prog.weeks + '" min="4" max="24">';
+        html += '</div>';
+
+        html += '<h3>Träningsdagar (' + prog.schedule.length + ')</h3>';
+        
+        prog.schedule.forEach((day, dayIdx) => {
+          html += '<div class="card" style="border-left: 4px solid var(--primary);">';
+          html += '<h4>' + day.day + ' - ' + day.muscle + '</h4>';
+          html += '<p class="text-muted" style="margin-bottom: 1rem;">Split: <strong>' + day.split + '</strong></p>';
+          
+          html += '<div style="margin-bottom: 1rem;"><label style="font-size: 0.8rem;">Övningar (' + day.exercises.length + ')</label>';
+          day.exercises.forEach((ex, exIdx) => {
+            html += '<div class="exercise-item" style="cursor: default;">';
+            html += '<div style="display: flex; justify-content: space-between;">';
+            html += '<div><strong>' + ex.name + '</strong><p class="text-muted">' + ex.sets + 'x' + ex.reps + ' • ' + ex.type + '</p></div>';
+            html += '<button onclick="app.removeExercise(' + dayIdx + ',' + exIdx + ')" class="btn-danger btn-small">X</button>';
+            html += '</div>';
+            html += '</div>';
+          });
+          html += '</div>';
+          
+          html += '<button onclick="app.addExerciseToDay(' + dayIdx + ')" class="btn-secondary" style="width: 100%;">+ Lägg till övning</button>';
+          html += '</div>';
+        });
+
+        html += '<button class="btn-primary" onclick="app.saveEditProgram(' + parseInt(selProgIdx) + ')">Spara ändringar</button>';
+        
+        return html;
+      },
+
+      // ===== WORKOUT =====
+      renderWorkout() {
+        if (!this.state.currentWorkout) {
+          return '<h2>Ingen aktiv träning</h2>';
+        }
+
+        const wo = this.state.currentWorkout;
+        const prog = this.state.programs.find(p => p.id === wo.programId);
+        const goal = prog ? (prog.goal || 'hypertrophy') : 'hypertrophy';
+        const weekNum = prog ? prog.currentWeek : 1;
+        const sessionInWeek = prog ? prog.currentDayInWeek : 0;
+        const daysPerWeek = prog ? prog.daysPerWeek : 1;
+
+        let html = '<button class="btn-secondary" onclick="app.cancelWorkout()">← Avbryt</button>';
+        html += '<h2>' + wo.day + ' – ' + wo.muscle + '</h2>';
+        html += '<div style="background:#1e293b;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">';
+        html += '<span style="color:var(--text-muted);font-size:0.85rem;">Vecka ' + weekNum + ' · Pass ' + (sessionInWeek + 1) + '/' + daysPerWeek + '</span>';
+        const goalLabels = { strength: '💪 Styrka', hypertrophy: '🏋️ Hypertrofi', conditioning: '🏃 Kondition' };
+        html += '<span style="color:var(--primary);font-size:0.8rem;font-weight:700;">' + (goalLabels[goal] || goal) + '</span>';
+        html += '</div>';
+
+        wo.exercises.forEach((ex, idx) => {
+          const doneSets = ex.completed.length;
+          const pct = Math.round((doneSets / ex.sets) * 100);
+          const allDone = doneSets >= ex.sets;
+
+          html += '<div class="card" style="border-left: 4px solid ' + (allDone ? 'var(--primary)' : '#334155') + ';user-select:none;" ontouchstart="app.touchStart(event,' + idx + ')" ontouchend="app.touchEnd(event,' + idx + ')">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+          html += '<div><h4 style="margin:0;">' + ex.name + '</h4>';
+          html += '<p class="text-muted" style="font-size:0.85rem;">' + ex.sets + ' set × ' + ex.reps + ' reps</p></div>';
+          html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+          html += '<button onclick="app.swapExercise(' + idx + ')" style="background:none;border:1px solid #334155;color:var(--text-muted);padding:0.25rem 0.5rem;border-radius:0.4rem;font-size:0.8rem;cursor:pointer;" title="Byt övning">🔄 Byt</button>';
+          html += '<span style="font-size:1.2rem;">' + (allDone ? '✅' : (doneSets > 0 ? '⏳' : '⬜')) + '</span>';
+          html += '</div>';
+          html += '</div>';
+
+          html += '<div style="display:flex;align-items:center;gap:0.75rem;margin:0.75rem 0;">';
+          html += '<label style="margin:0;text-transform:none;font-size:0.85rem;color:var(--text-muted);white-space:nowrap;">Vikt (kg)</label>';
+          html += '<input type="number" placeholder="—" value="' + (ex.weight || '') + '" onchange="app.setExWeight(' + idx + ', this.value)" style="width:90px;margin:0;padding:0.4rem 0.6rem;">';
+          html += '</div>';
+
+          html += '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
+          for (let i = 1; i <= ex.sets; i++) {
+            const done = ex.completed.includes(i);
+            html += '<button onclick="app.logSet(' + idx + ',' + i + ')" style="background:' + (done ? 'var(--primary)' : '#334155') + ';color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.4rem;cursor:pointer;font-weight:600;">Set ' + i + (done ? ' ✓' : '') + '</button>';
+          }
+          html += '</div>';
+
+          if (doneSets > 0) {
+            html += '<div style="background:#0f1419;border-radius:0.4rem;padding:0.4rem 0.75rem;font-size:0.82rem;color:' + (allDone ? 'var(--primary)' : 'var(--accent)') + ';">';
+            html += doneSets + '/' + ex.sets + ' set (' + pct + '%) ' + (allDone ? '✅' : '⚠️');
+            html += '</div>';
+          }
+
+          html += '</div>';
+        });
+
+        const totalCompletion = Math.round(ProgressionEngine.calcCompletion(wo.exercises) * 100);
+        html += '<div style="background:var(--card-bg);border-radius:0.75rem;padding:1rem;margin:1rem 0;text-align:center;">';
+        html += '<span style="font-size:0.9rem;color:var(--text-muted);">Passkompletion: </span>';
+        html += '<strong style="font-size:1.1rem;color:' + (totalCompletion >= 85 ? 'var(--primary)' : 'var(--accent)') + ';">' + totalCompletion + '%</strong>';
+        html += '</div>';
+
+        html += '<button onclick="app.finishWorkout()" class="btn-primary" style="margin-top:0.5rem;font-size:1.1rem;">✓ AVSLUTA PASS</button>';
+        return html;
+      },
+
+      // ===== SESSION RESULT =====
+      renderSessionResult() {
+        const r = this.state.lastSessionResult;
+        if (!r) return '<h2>Inget resultat</h2>';
+
+        const { wo, passed, completionPct, weekResult, goal, weekNum } = r;
+        const goalLabels = { strength: '💪 Styrka', hypertrophy: '🏋️ Hypertrofi', conditioning: '🏃 Kondition' };
+        const sessionThreshold = ProgressionEngine.cfg(goal).sessionThreshold * 100;
+
+        let html = '<div style="text-align:center;padding:1rem 0 0.5rem;">';
+        html += '<div style="font-size:3.5rem;">' + (passed ? '✅' : '⚠️') + '</div>';
+        html += '<h2 style="margin:0.5rem 0;">' + (passed ? 'Pass godkänt!' : 'Ofullständigt pass') + '</h2>';
+        html += '<p class="text-muted">Vecka ' + weekNum + ' · ' + (goalLabels[goal] || goal) + '</p>';
+        html += '</div>';
+
+        html += '<div class="card" style="margin:1rem 0;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">';
+        html += '<span style="color:var(--text-muted);">Passkompletion</span>';
+        html += '<strong style="font-size:1.4rem;color:' + (passed ? 'var(--primary)' : 'var(--accent)') + ';">' + completionPct + '%</strong>';
+        html += '</div>';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;height:8px;overflow:hidden;">';
+        html += '<div style="width:' + Math.min(completionPct, 100) + '%;height:100%;background:' + (passed ? 'var(--primary)' : 'var(--accent)') + ';border-radius:0.5rem;transition:width 0.5s;"></div>';
+        html += '</div>';
+        html += '<p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem;">Tröskel: ' + sessionThreshold + '%</p>';
+        html += '</div>';
+
+        let newPRs = 0;
+        html += '<div class="card" style="margin:1rem 0;">';
+        html += '<h4 style="margin:0 0 0.75rem;">Övningar</h4>';
+        wo.exercises.forEach(ex => {
+          const done = ex.completed.length;
+          const ok = done >= ex.sets;
+          const w = parseFloat(ex.weight) || 0;
+          const prevBest = this.getPRBefore(ex.name, wo.date);
+          const isPR = w > 0 && w > prevBest && done > 0;
+          if (isPR) newPRs++;
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #1e293b;">';
+          html += '<span style="font-size:0.9rem;">' + ex.name;
+          if (ex.weight) html += ' <span style="color:var(--text-muted);font-size:0.82rem;">@ ' + ex.weight + ' kg</span>';
+          if (isPR) html += ' <span class="pr-badge">🏆 PR</span>';
+          html += '</span>';
+          html += '<span style="font-size:0.85rem;color:' + (ok ? 'var(--primary)' : 'var(--accent)') + ';">' + done + '/' + ex.sets + ' ' + (ok ? '✅' : '⚠️') + '</span>';
+          html += '</div>';
+        });
+        html += '</div>';
+        if (newPRs > 0) {
+          html += '<div style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(217,119,6,0.1));border:2px solid #f59e0b;border-radius:0.75rem;padding:1rem;text-align:center;margin-bottom:1rem;">';
+          html += '<div style="font-size:2rem;">🏆</div>';
+          html += '<strong style="color:#f59e0b;">' + newPRs + ' nytt personbästa' + (newPRs > 1 ? '!' : '!') + '</strong>';
+          html += '<p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem;">Ny maxvikt för ' + newPRs + ' övning' + (newPRs > 1 ? 'ar' : '') + '</p>';
+          html += '</div>';
+        }
+
+        if (weekResult && weekResult.weekComplete) {
+          const decisionLabels = {
+            progress: { icon: '✅', text: 'PROGRESS – Vecka ' + (weekNum + 1) + ' laddas!', color: 'var(--primary)', desc: 'Du nådde dina mål. Belastningen ökas till nästa vecka.' },
+            repeat:   { icon: '⚠️', text: 'UPPREPAR vecka ' + weekNum, color: 'var(--accent)', desc: 'Du nådde ' + Math.round((weekResult.passedCount / weekResult.totalCount) * 100) + '% av passen. Samma belastning nästa vecka.' },
+            deload:   { icon: '🔄', text: 'DELOAD – Återhämtning', color: 'var(--secondary)', desc: 'Under tröskeln. Volymen sänks tillfälligt för återhämtning.' }
+          };
+          const d = decisionLabels[weekResult.decision];
+          html += '<div style="background:rgba(16,185,129,0.1);border:2px solid ' + d.color + ';border-radius:0.75rem;padding:1.25rem;margin:1rem 0;text-align:center;">';
+          html += '<div style="font-size:2rem;">' + d.icon + '</div>';
+          html += '<strong style="color:' + d.color + ';font-size:1.1rem;">' + d.text + '</strong>';
+          html += '<p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">' + d.desc + '</p>';
+          html += '<p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem;">Inte rätt? Välj manuellt:</p>';
+          html += '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem;flex-wrap:wrap;">';
+          html += '<button onclick="app.manualOverride(\'progress\')" class="btn-secondary btn-small">✅ Progress</button>';
+          html += '<button onclick="app.manualOverride(\'repeat\')" class="btn-secondary btn-small">⚠️ Upprepa</button>';
+          html += '<button onclick="app.manualOverride(\'deload\')" class="btn-secondary btn-small">🔄 Deload</button>';
+          html += '</div>';
+          html += '</div>';
+        } else if (weekResult) {
+          const prog = this.state.programs.find(p => p.active);
+          const sessionsLeft = prog ? (prog.daysPerWeek - prog.currentDayInWeek) : 0;
+          const entry = prog ? ProgressionEngine.getCurrentWeekEntry(prog) : null;
+          const passedSoFar = entry ? entry.sessions.filter(s => s.passed).length : 0;
+          const totalSoFar = entry ? entry.sessions.length : 0;
+          html += '<div class="card" style="margin:1rem 0;">';
+          html += '<h4 style="margin:0 0 0.5rem;">Vecka ' + weekNum + ' status</h4>';
+          html += '<p style="color:var(--text-muted);font-size:0.85rem;">' + passedSoFar + '/' + totalSoFar + ' pass godkända · ' + sessionsLeft + ' pass kvar</p>';
+          if (entry) {
+            html += '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">';
+            entry.sessions.forEach(s => { html += '<span style="font-size:1.2rem;">' + (s.passed ? '✅' : '⚠️') + '</span>'; });
+            for (let i = entry.sessions.length; i < (prog ? prog.daysPerWeek : 0); i++) { html += '<span style="font-size:1.2rem;">⬜</span>'; }
+            html += '</div>';
+          }
+          html += '</div>';
+        }
+
+        html += '<button onclick="app.setView(\'dashboard\')" class="btn-primary" style="margin-top:1rem;">Tillbaka till Dashboard</button>';
+        return html;
+      },
+
+      // ===== HISTORY =====
+      renderHistory() {
+        let html = '<h2>Träningshistoria</h2>';
+
+        const activeProgram = this.state.programs.find(p => p.active) || this.state.programs[0];
+
+        if (activeProgram && (activeProgram.weekHistory || []).length > 0) {
+          html += '<h3>Veckoöversikt</h3>';
+          const decisionInfo = {
+            progress: { icon: '✅', label: 'Progress', color: 'var(--primary)' },
+            repeat:   { icon: '⚠️', label: 'Upprepar', color: 'var(--accent)' },
+            deload:   { icon: '🔄', label: 'Deload', color: 'var(--secondary)' }
+          };
+
+          activeProgram.weekHistory.forEach(w => {
+            const passedCount = w.sessions.filter(s => s.passed).length;
+            const total = w.sessions.length;
+            const rate = total > 0 ? Math.round((passedCount / total) * 100) : 0;
+            const d = w.decision ? (decisionInfo[w.decision] || { icon: '?', label: w.decision, color: 'var(--text-muted)' }) : null;
+            const weekLabel = w.retry > 0 ? 'Vecka ' + w.week + ' (försök ' + (w.retry + 1) + ')' : 'Vecka ' + w.week;
+
+            html += '<div class="card" style="margin:0.75rem 0;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">';
+            html += '<strong>' + weekLabel + '</strong>';
+            if (d) html += '<span style="color:' + d.color + ';font-weight:700;">' + d.icon + ' ' + d.label + '</span>';
+            else html += '<span style="color:var(--text-muted);font-size:0.82rem;">Pågår</span>';
+            html += '</div>';
+
+            html += '<div style="display:flex;gap:0.4rem;margin-bottom:0.5rem;">';
+            w.sessions.forEach(s => { html += '<span style="font-size:1.1rem;" title="' + s.day + ' ' + s.completionPct + '%">' + (s.passed ? '✅' : '⚠️') + '</span>'; });
+            html += '</div>';
+
+            html += '<div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-muted);">';
+            html += '<span>' + passedCount + '/' + total + ' pass godkända (' + rate + '%)</span>';
+            if (w.sessions.length > 0) html += '<span>' + new Date(w.sessions[0].date).toLocaleDateString('sv-SE') + '</span>';
+            html += '</div>';
+            html += '</div>';
+          });
+
+          html += '<h3 style="margin-top:1.5rem;">Alla pass</h3>';
+        }
+
+        if (this.state.workoutHistory.length === 0) {
+          html += '<p class="text-muted">Ingen träning loggad ännu</p>';
+        } else {
+          [...this.state.workoutHistory].reverse().forEach(wo => {
+            html += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;">';
+            html += '<div>';
+            html += '<h4 style="margin:0 0 0.25rem;">' + wo.day + ' – ' + wo.muscle + '</h4>';
+            html += '<p class="text-muted" style="font-size:0.82rem;">' + new Date(wo.date).toLocaleDateString('sv-SE') + '</p>';
+            html += '<p style="margin-top:0.25rem;font-size:0.85rem;color:var(--text-muted);">' + wo.exercises.length + ' övningar</p>';
+            html += '</div>';
+            html += '<div style="text-align:right;">';
+            html += '<div style="font-size:1.4rem;">' + (wo.passed ? '✅' : (wo.completionPct !== undefined ? '⚠️' : '📋')) + '</div>';
+            if (wo.completionPct !== undefined) html += '<div style="font-size:0.8rem;color:var(--text-muted);">' + wo.completionPct + '%</div>';
+            html += '</div>';
+            html += '</div>';
+          });
+        }
+
+        return html;
+      },
+
+      // ===== MORE =====
+      renderMore() {
+        let html = '<h2>Inställningar</h2>';
+
+        html += '<div class="card">';
+        html += '<h4 style="margin:0 0 0.75rem;">Ditt namn</h4>';
+        html += '<div style="display:flex;gap:0.5rem;">';
+        html += '<input type="text" id="userNameInput" value="' + (this.state.userName || '') + '" placeholder="Ange ditt namn" style="margin:0;flex:1;">';
+        html += '<button onclick="app.saveName()" class="btn-secondary" style="margin:0;white-space:nowrap;">Spara</button>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '<div class="card">';
+        html += '<h4 style="margin:0 0 0.5rem;">Övningsbibliotek</h4>';
+        html += '<p class="text-muted" style="font-size:0.85rem;">150+ övningar inbyggda · Hämtar extra från wger.de (gratis)</p>';
+        let wgerStatus = 'Inte laddad';
+        try {
+          const cached = localStorage.getItem('gordito_wger');
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            const daysOld = Math.floor((Date.now() - timestamp) / 86400000);
+            wgerStatus = data.length + ' övningar · laddad ' + daysOld + ' dag(ar) sedan';
+          }
+        } catch(e) {}
+        html += '<p style="font-size:0.82rem;color:var(--primary);margin:0.5rem 0 0.75rem;">Status: ' + wgerStatus + '</p>';
+        html += '<button onclick="app.reloadAPIExercises()" class="btn-secondary" style="width:100%;">🔄 Uppdatera övningsbibliotek</button>';
+        html += '</div>';
+
+        html += '<div class="card">';
+        html += '<h4 style="margin:0 0 0.5rem;">Om appen</h4>';
+        html += '<p class="text-muted" style="font-size:0.85rem;">Version 7.0 · All data sparas lokalt på din enhet</p>';
+        html += '<p class="text-muted" style="margin-top:0.5rem;font-size:0.85rem;">✅ 6 träningstyper &nbsp; ✅ Progression Engine<br>✅ Veckoanalys &nbsp; ✅ Offline-first &nbsp; ✅ wger API</p>';
+        html += '</div>';
+
+        html += '<div class="card" style="border-color:var(--danger);">';
+        html += '<h4 style="margin:0 0 0.5rem;color:var(--danger);">Återställ all data</h4>';
+        html += '<p class="text-muted" style="font-size:0.85rem;margin-bottom:0.75rem;">Raderar alla program och träningshistorik permanent.</p>';
+        html += '<button onclick="if(confirm(\'Radera ALL data? Det går inte att ångra.\')) app.resetAllData()" class="btn-danger" style="width:100%;">Radera all data</button>';
+        html += '</div>';
+
+        return html;
+      },
+
+      // ===== ACTIONS =====
+      selectProgramType(type) {
+        sessionStorage.setItem('selectedProgramType', type);
+        sessionStorage.removeItem('selectedDays');
+        this.render();
+      },
+
+      selectDays(days) {
+        sessionStorage.setItem('selectedDays', days);
+        this.render();
+      },
+
+      createProgram() {
+        const name = document.getElementById('progName').value.trim();
+        const daysStr = sessionStorage.getItem('selectedDays');
+        const weeks = parseInt(document.getElementById('progWeeks').value);
+        const programType = sessionStorage.getItem('selectedProgramType') || 'styrka';
+
+        if (!name) { this.showToast('Ange programnamn', 'error'); return; }
+        if (!daysStr) { this.showToast('Välj antal träningsdagar', 'error'); return; }
+
+        const days = parseInt(daysStr);
+        const goal = document.querySelector('input[name="goal"]:checked')?.value || 'hypertrophy';
+        const newProgram = WorkoutLibrary.createProgram(days, name, weeks, goal, programType);
+
+        this.state.programs.push(newProgram);
+        this.save();
+        sessionStorage.removeItem('selectedProgramType');
+        sessionStorage.removeItem('selectedDays');
+        this.showToast('Program "' + name + '" skapat! 🎉', 'success');
+        this.setView('programs');
+      },
+
+      selectProgram(idx) {
+        this.state.programs.forEach((p, i) => p.active = i === idx);
+        this.save();
+        this.showToast('Program aktiverat', 'success');
+        this.setView('dashboard');
+      },
+
+      editProgramView(idx) {
+        sessionStorage.setItem('selectedProgIdx', idx);
+        this.setView('editProgram');
+      },
+
+      saveEditProgram(idx) {
+        const prog = this.state.programs[idx];
+        const newName = document.getElementById('editProgName').value.trim();
+        const newWeeks = parseInt(document.getElementById('editProgWeeks').value);
+
+        if (!newName) {
+          this.showToast('Ange programnamn', 'error');
+          return;
+        }
+
+        prog.name = newName;
+        prog.weeks = newWeeks;
+        this.save();
+        this.showToast('Program uppdaterat', 'success');
+        this.setView('programs');
+      },
+
+      deleteProgram(idx) {
+        if (confirm('Radera detta program?')) {
+          this.state.programs.splice(idx, 1);
+          this.save();
+          this.showToast('Program raderat', 'success');
+          this.render();
+        }
+      },
+
+      removeExercise(dayIdx, exIdx) {
+        const selProgIdx = sessionStorage.getItem('selectedProgIdx');
+        const prog = this.state.programs[parseInt(selProgIdx)];
+        prog.schedule[dayIdx].exercises.splice(exIdx, 1);
+        this.save();
+        this.render();
+      },
+
+      addExerciseToDay(dayIdx) {
+        const selProgIdx = sessionStorage.getItem('selectedProgIdx');
+        const prog = this.state.programs[parseInt(selProgIdx)];
+        const day = prog.schedule[dayIdx];
+
+        // Hämta övningar för denna split
+        const available = WorkoutLibrary.getExercises(day.split, 10);
+        // Filtrera bort redan tillagda
+        const used = day.exercises.map(e => e.name);
+        const toAdd = available.find(e => !used.includes(e.name));
+
+        if (toAdd) {
+          day.exercises.push(toAdd);
+          this.save();
+          this.render();
+          this.showToast('Övning tillagd', 'success');
+        } else {
+          this.showToast('Inga fler övningar tillgängliga för denna split', 'warning');
+        }
+      },
+
+      startWorkout() {
+        let activeProgram = this.state.programs.find(p => p.active);
+        if (!activeProgram && this.state.programs.length > 0) {
+          activeProgram = this.state.programs[0];
+        }
+
+        if (!activeProgram || !activeProgram.schedule.length) {
+          this.showToast('Inget program valt eller tomt schema', 'error');
+          return;
+        }
+
+        // Backfill progression fields for programs created before this feature
+        if (activeProgram.currentDayInWeek === undefined) {
+          activeProgram.currentDayInWeek = 0;
+          activeProgram.currentWeek = activeProgram.currentWeek || 1;
+          activeProgram.currentRetry = activeProgram.currentRetry || 0;
+          activeProgram.weekHistory = activeProgram.weekHistory || [];
+          activeProgram.goal = activeProgram.goal || 'hypertrophy';
+        }
+
+        // Apply any pending week decision before the new session starts
+        const pendingWeek = activeProgram.weekHistory.find(w => w.pending);
+        if (pendingWeek) {
+          ProgressionEngine.applyWeekDecision(activeProgram, pendingWeek.decision);
+          pendingWeek.pending = false;
+          this.save();
+        }
+
+        // Check if the program is fully complete (after applying pending so currentWeek is up to date)
+        if (activeProgram.currentWeek > activeProgram.weeks) {
+          this.setView('programComplete');
+          return;
+        }
+
+        const dayIdx = activeProgram.currentDayInWeek % activeProgram.schedule.length;
+        const day = activeProgram.schedule[dayIdx];
+
+        this.state.currentWorkout = {
+          id: Date.now(),
+          programId: activeProgram.id,
+          dayIdx: dayIdx,
+          day: day.day,
+          muscle: day.muscle,
+          exercises: day.exercises.map(ex => ({
+            ...ex,
+            completed: [],
+            weight: ex.weight || ''
+          })),
+          date: new Date().toISOString(),
+          startTime: new Date().toISOString()
+        };
+
+        this.setView('workout');
+      },
+
+      setExWeight(exIdx, value) {
+        const ex = this.state.currentWorkout.exercises[exIdx];
+        ex.weight = parseFloat(value) || '';
+        // also update the program schedule so weight persists
+        const prog = this.state.programs.find(p => p.id === this.state.currentWorkout.programId);
+        if (prog) {
+          const dayIdx = this.state.currentWorkout.dayIdx;
+          if (prog.schedule[dayIdx] && prog.schedule[dayIdx].exercises[exIdx]) {
+            prog.schedule[dayIdx].exercises[exIdx].weight = ex.weight;
+          }
+        }
+      },
+
+      logSet(exIdx, setNum) {
+        const ex = this.state.currentWorkout.exercises[exIdx];
+        if (ex.completed.includes(setNum)) {
+          ex.completed = ex.completed.filter(s => s !== setNum);
+        } else {
+          ex.completed.push(setNum);
+          this.startRestTimer(90);
+        }
+        this.render();
+      },
+
+      completeExercise(exIdx) {
+        const ex = this.state.currentWorkout.exercises[exIdx];
+        ex.completed = Array.from({ length: ex.sets }, (_, i) => i + 1);
+        this.render();
+      },
+
+      finishWorkout() {
+        this.clearTimer();
+        const wo = this.state.currentWorkout;
+        const prog = this.state.programs.find(p => p.id === wo.programId);
+        const goal = prog ? (prog.goal || 'hypertrophy') : 'hypertrophy';
+
+        const completionPct = ProgressionEngine.calcCompletion(wo.exercises);
+        const passed = ProgressionEngine.sessionPassed(wo.exercises, goal);
+
+        wo.completionPct = Math.round(completionPct * 100);
+        wo.passed = passed;
+        wo.completed = wo.exercises.filter(e => e.completed.length >= e.sets).length;
+        wo.total = wo.exercises.length;
+
+        this.state.workoutHistory.push(wo);
+
+        let weekResult = null;
+        if (prog) {
+          weekResult = ProgressionEngine.addSession(prog, {
+            date: wo.date,
+            day: wo.day,
+            completionPct: wo.completionPct,
+            passed: passed
+          });
+        }
+
+        this.state.currentWorkout = null;
+        this.state.lastSessionResult = {
+          wo, passed, completionPct: wo.completionPct, weekResult, goal,
+          weekNum: prog ? prog.currentWeek : 1
+        };
+
+        this.save();
+        this.setView('sessionResult');
+      },
+
+      manualOverride(decision) {
+        const prog = this.state.programs.find(p => p.active) || this.state.programs[0];
+        if (!prog) return;
+        const pendingWeek = prog.weekHistory.find(w => w.pending);
+        if (pendingWeek) pendingWeek.decision = decision;
+        this.save();
+        const labels = { progress: '✅ Progress', repeat: '⚠️ Upprepar', deload: '🔄 Deload' };
+        this.showToast('Override: ' + (labels[decision] || decision), 'success');
+        this.setView('dashboard');
+      },
+
+      cancelWorkout() {
+        this.clearTimer();
+        this.state.currentWorkout = null;
+        this.setView('dashboard');
+      },
+
+      saveName() {
+        const val = document.getElementById('userNameInput').value.trim();
+        if (val) {
+          this.state.userName = val;
+          this.save();
+          this.showToast('Namn sparat!', 'success');
+        }
+      },
+
+      resetAllData() {
+        localStorage.removeItem('familyfit_state');
+        location.reload();
+      },
+
+      async reloadAPIExercises() {
+        localStorage.removeItem('gordito_wger');
+        this.showToast('Hämtar övningar från wger.de...', 'success');
+        await WorkoutLibrary.loadAPIExercises();
+        this.showToast('Övningsbibliotek uppdaterat! ✅', 'success');
+        this.render();
+      },
+
+      // ===== REST TIMER =====
+      startRestTimer(seconds = 90) {
+        this.clearTimer();
+        const bar = document.getElementById('timerBar');
+        const countEl = document.getElementById('timerCount');
+        const msgEl = document.getElementById('timerMsg');
+        if (!bar || !countEl) return;
+        bar.classList.add('active');
+        bar.classList.remove('urgent');
+        if (msgEl) msgEl.textContent = '';
+        const endTime = Date.now() + seconds * 1000;
+        const update = () => {
+          const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+          countEl.textContent = remaining;
+          if (remaining <= 10) bar.classList.add('urgent');
+          if (remaining === 0) {
+            this.clearTimer();
+            if (msgEl) msgEl.textContent = 'Kör på! 💪';
+            bar.classList.add('active');
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+            setTimeout(() => { bar.classList.remove('active'); if (msgEl) msgEl.textContent = ''; }, 3000);
+          }
+        };
+        update();
+        this._timerInterval = setInterval(update, 500);
+      },
+
+      clearTimer() {
+        if (this._timerInterval) { clearInterval(this._timerInterval); this._timerInterval = null; }
+        const bar = document.getElementById('timerBar');
+        if (bar) { bar.classList.remove('active', 'urgent'); }
+      },
+
+      // ===== SWAP EXERCISE =====
+      swapExercise(exIdx) {
+        const wo = this.state.currentWorkout;
+        if (!wo) return;
+        const currentEx = wo.exercises[exIdx];
+        const prog = this.state.programs.find(p => p.id === wo.programId);
+        const scheduleDay = prog ? prog.schedule[wo.dayIdx] : null;
+        const split = scheduleDay ? scheduleDay.split : 'Push';
+        const pool = WorkoutLibrary.getExercises(split, 20);
+        const usedNames = wo.exercises.map(e => e.name);
+        const alts = pool.filter(e => e.name !== currentEx.name && !usedNames.includes(e.name));
+        if (!alts.length) { this.showToast('Inga alternativ tillgängliga', 'warning'); return; }
+        const picked = alts[Math.floor(Math.random() * alts.length)];
+        wo.exercises[exIdx] = { ...picked, completed: [], weight: '' };
+        this.render();
+        this.showToast('Bytte till ' + picked.name + ' 🔄', 'success');
+      },
+
+      // ===== SWIPE GESTURE =====
+      touchStart(e, idx) {
+        this._touchX = e.touches[0].clientX;
+        this._touchIdx = idx;
+      },
+
+      touchEnd(e, idx) {
+        if (this._touchIdx !== idx) return;
+        const delta = e.changedTouches[0].clientX - (this._touchX || 0);
+        if (delta > 65) {
+          const ex = this.state.currentWorkout && this.state.currentWorkout.exercises[idx];
+          if (!ex) return;
+          const wasDone = ex.completed.length >= ex.sets;
+          if (!wasDone) {
+            ex.completed = Array.from({ length: ex.sets }, (_, i) => i + 1);
+            this.showToast('✅ ' + ex.name + ' klar!', 'success');
+            this.startRestTimer(90);
+            this.render();
+          }
+        }
+      },
+
+      // ===== PR DETECTION =====
+      getPRBefore(exerciseName, beforeDate) {
+        let best = 0;
+        (this.state.workoutHistory || []).forEach(wo => {
+          if (!wo.exercises || wo.date === beforeDate) return;
+          wo.exercises.forEach(ex => {
+            if (ex.name === exerciseName && parseFloat(ex.weight) > best && (ex.completed || []).length > 0) {
+              best = parseFloat(ex.weight);
+            }
+          });
+        });
+        return best;
+      },
+
+      // ===== PROGRAM COMPLETE =====
+      renderProgramComplete() {
+        const prog = this.state.programs.find(p => p.active) || this.state.programs[0];
+        const wh = prog ? (prog.weekHistory || []) : [];
+        const totalSessions = wh.reduce((s, w) => s + w.sessions.length, 0);
+        const passedSessions = wh.reduce((s, w) => s + w.sessions.filter(x => x.passed).length, 0);
+        const accuracy = totalSessions > 0 ? Math.round(passedSessions / totalSessions * 100) : 0;
+
+        let html = '<div style="text-align:center;padding:2rem 0 1rem;">';
+        html += '<div style="font-size:4rem;animation:spin 2s linear infinite;display:inline-block;">🏆</div>';
+        html += '<h2 style="color:var(--primary);margin:1rem 0 0.25rem;">' + (prog ? prog.name : '') + '</h2>';
+        html += '<p style="color:var(--text-muted);">Program avslutat!</p>';
+        html += '</div>';
+
+        html += '<div class="grid-2" style="margin:1.5rem 0 0.5rem;">';
+        html += '<div class="stat-card"><div class="text-muted">Veckor</div><div class="stat-value">' + (prog ? prog.weeks : 0) + '</div></div>';
+        html += '<div class="stat-card"><div class="text-muted">Pass totalt</div><div class="stat-value">' + totalSessions + '</div></div>';
+        html += '</div>';
+        html += '<div class="grid-2" style="margin-bottom:1.5rem;">';
+        html += '<div class="stat-card"><div class="text-muted">Pass godkända</div><div class="stat-value">' + passedSessions + '</div></div>';
+        html += '<div class="stat-card"><div class="text-muted">Träffsäkerhet</div><div class="stat-value">' + accuracy + '%</div></div>';
+        html += '</div>';
+
+        html += '<div class="card" style="text-align:center;">';
+        html += '<p style="margin-bottom:1rem;color:var(--text-muted);">Köra om med ökad belastning?</p>';
+        html += '<button onclick="app.restartProgram()" class="btn-primary">🔄 Kör om programmet</button>';
+        html += '</div>';
+        html += '<button onclick="app.setView(\'programs\')" class="btn-secondary" style="width:100%;margin-top:0.5rem;">Välj nytt program</button>';
+        return html;
+      },
+
+      restartProgram() {
+        const prog = this.state.programs.find(p => p.active) || this.state.programs[0];
+        if (!prog) return;
+        prog.schedule.forEach(day => {
+          day.exercises = ProgressionEngine.applyIncrement(day.exercises, prog.goal);
+        });
+        prog.currentWeek = 1;
+        prog.currentRetry = 0;
+        prog.currentDayInWeek = 0;
+        prog.weekHistory = [];
+        this.save();
+        this.showToast('Program omstartat med ökad belastning! 💪', 'success');
+        this.setView('dashboard');
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => app.init());
+  </script>
+</body>
+</html>

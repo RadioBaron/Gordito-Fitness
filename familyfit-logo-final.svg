@@ -1,0 +1,60 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  
+  <!-- Background Circle (subtle) -->
+  <circle cx="150" cy="130" r="110" fill="none" stroke="#344e86" stroke-width="0.5" opacity="0.3"/>
+  
+  <!-- Main Heart Shape - Primary -->
+  <path d="M 150,220 C 85,180 40,145 40,95 C 40,65 60,45 85,45 C 105,45 125,58 150,80 C 175,58 195,45 215,45 C 240,45 260,65 260,95 C 260,145 215,180 150,220 Z" 
+        fill="#344e86" opacity="0.95" filter="url(#shadow)"/>
+  
+  <!-- Left Eye - Large Circle -->
+  <circle cx="85" cy="85" r="18" fill="white" opacity="0.98"/>
+  <circle cx="85" cy="85" r="11" fill="#344e86"/>
+  <circle cx="88" cy="82" r="4" fill="white" opacity="0.8"/>
+  
+  <!-- Right Eye - Large Circle -->
+  <circle cx="215" cy="85" r="18" fill="white" opacity="0.98"/>
+  <circle cx="215" cy="85" r="11" fill="#344e86"/>
+  <circle cx="218" cy="82" r="4" fill="white" opacity="0.8"/>
+  
+  <!-- Smile Curve - Smooth Arc -->
+  <path d="M 100,120 Q 150,145 200,120" 
+        stroke="#344e86" stroke-width="5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Heartbeat Line Group -->
+  <g stroke="url(#pulseGradient)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#softGlow)">
+    <!-- Left pulse segment -->
+    <path d="M 110,165 L 120,165 L 123,160 L 127,170 L 130,165 L 135,165"/>
+    
+    <!-- Right pulse segment -->
+    <path d="M 165,165 L 175,165 L 178,160 L 182,170 L 185,165 L 190,165"/>
+  </g>
+  
+  <!-- Decorative Rhythm Dots -->
+  <circle cx="95" cy="160" r="2" fill="#f97316" opacity="0.6"/>
+  <circle cx="205" cy="160" r="2" fill="#f97316" opacity="0.6"/>
+  
+  <!-- Bottom Point Accent -->
+  <path d="M 150,220 L 155,235 L 145,235 Z" fill="#f97316" opacity="0.8"/>
+  
+  <!-- Outer Ring - Subtle Strength Indicator -->
+  <circle cx="150" cy="130" r="128" fill="none" stroke="#344e86" stroke-width="1.2" opacity="0.4" stroke-dasharray="3,6"/>
+</svg>
