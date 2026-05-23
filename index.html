@@ -537,32 +537,42 @@
           const res = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
           if (!res.ok) throw new Error();
           const data = await res.json();
-          // Store condensed version to save localStorage space
-          const slim = data.map(e => ({ name: e.name, bodyPart: e.bodyPart, equipment: e.equipment, target: e.target }));
+          // Store condensed version with correct field names
+          const slim = data.map(e => ({
+            name: e.name,
+            primaryMuscles: e.primaryMuscles || [],
+            equipment: e.equipment || '',
+            category: e.category || ''
+          })).filter(e => e.name && e.primaryMuscles.length > 0);
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data: slim, timestamp: Date.now() }));
           this._mergeFreeDB(slim);
         } catch (e) {}
       },
 
       _mergeFreeDB(exercises) {
-        const bodyPartMap = {
+        // Maps primaryMuscles values → our split categories
+        const muscleMap = {
           'chest': 'Push', 'shoulders': 'Push', 'triceps': 'Push',
-          'back': 'Pull', 'lats': 'Pull', 'biceps': 'Pull',
-          'upper legs': 'Legs', 'lower legs': 'Legs', 'glutes': 'Legs',
-          'waist': 'BW_Core', 'cardio': 'Cardio_Interval'
+          'lats': 'Pull', 'biceps': 'Pull', 'middle back': 'Pull',
+          'lower back': 'Pull', 'traps': 'Pull', 'forearms': 'Pull',
+          'quadriceps': 'Legs', 'hamstrings': 'Legs', 'glutes': 'Legs',
+          'calves': 'Legs', 'adductors': 'Legs', 'abductors': 'Legs',
+          'abdominals': 'BW_Core', 'neck': 'Pull'
         };
         const eqMap = {
-          'barbell': 'Barbell', 'dumbbell': 'Dumbbell', 'body weight': 'Bodyweight',
-          'kettlebell': 'Kettlebell', 'cable': 'Cable', 'band': 'Band', 'machine': 'Machine'
+          'barbell': 'Barbell', 'dumbbell': 'Dumbbell', 'body only': 'Bodyweight',
+          'kettlebell': 'Kettlebell', 'cable': 'Cable', 'bands': 'Band',
+          'machine': 'Machine', 'e-z curl bar': 'Barbell', 'other': 'Other'
         };
         exercises.forEach(ex => {
           if (!ex.name || ex.name.length < 3) return;
-          const target = bodyPartMap[(ex.bodyPart || '').toLowerCase()];
+          const muscles = ex.primaryMuscles || [];
+          const target = muscleMap[(muscles[0] || '').toLowerCase()];
           if (!target || !this.exercises[target]) return;
           const nameLower = ex.name.toLowerCase();
           if (this.exercises[target].find(e => e.name.toLowerCase() === nameLower)) return;
           const eq = eqMap[(ex.equipment || '').toLowerCase()] || 'Other';
-          const muscleName = ex.target ? ex.target.charAt(0).toUpperCase() + ex.target.slice(1) : 'General';
+          const muscleName = muscles[0] ? muscles[0].charAt(0).toUpperCase() + muscles[0].slice(1) : 'General';
           this.exercises[target].push({ name: ex.name, muscle: muscleName, type: eq, sets: 3, reps: '8-12', difficulty: 'Medium', source: 'freedb' });
         });
       },
@@ -714,10 +724,23 @@
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
-            // Merge saved state, keeping defaults for new fields
             this.state = { ...this.state, ...parsed };
           } catch (e) {}
         }
+        // Backwards compat: ensure customExercises always exists
+        if (!Array.isArray(this.state.customExercises)) this.state.customExercises = [];
+
+        // Invalidate old FreeDB cache that has wrong format (null bodyParts)
+        try {
+          const fdb = localStorage.getItem('gordito_freedb');
+          if (fdb) {
+            const { data } = JSON.parse(fdb);
+            if (data && data.length > 0 && !data[0].primaryMuscles) {
+              localStorage.removeItem('gordito_freedb');
+            }
+          }
+        } catch(e) { localStorage.removeItem('gordito_freedb'); }
+
         // Never reload into mid-session views
         if (this.state.currentView === 'sessionResult' || this.state.currentView === 'workout') {
           this.state.currentView = 'dashboard';
@@ -1341,11 +1364,12 @@
       createProgram() {
         const name = document.getElementById('progName').value.trim();
         const daysStr = sessionStorage.getItem('selectedDays');
-        const weeks = parseInt(document.getElementById('progWeeks').value);
+        const weeks = parseInt(document.getElementById('progWeeks').value) || 8;
         const programType = sessionStorage.getItem('selectedProgramType') || 'styrka';
 
         if (!name) { this.showToast('Ange programnamn', 'error'); return; }
         if (!daysStr) { this.showToast('Välj antal träningsdagar', 'error'); return; }
+        if (weeks < 1 || weeks > 52) { this.showToast('Antal veckor måste vara 1–52', 'error'); return; }
 
         const days = parseInt(daysStr);
         const goal = document.querySelector('input[name="goal"]:checked')?.value || 'hypertrophy';
@@ -1374,12 +1398,10 @@
       saveEditProgram(idx) {
         const prog = this.state.programs[idx];
         const newName = document.getElementById('editProgName').value.trim();
-        const newWeeks = parseInt(document.getElementById('editProgWeeks').value);
+        const newWeeks = parseInt(document.getElementById('editProgWeeks').value) || prog.weeks || 8;
 
-        if (!newName) {
-          this.showToast('Ange programnamn', 'error');
-          return;
-        }
+        if (!newName) { this.showToast('Ange programnamn', 'error'); return; }
+        if (newWeeks < 1 || newWeeks > 52) { this.showToast('Antal veckor måste vara 1–52', 'error'); return; }
 
         prog.name = newName;
         prog.weeks = newWeeks;
@@ -1390,7 +1412,12 @@
 
       deleteProgram(idx) {
         if (confirm('Radera detta program?')) {
+          const wasActive = this.state.programs[idx] && this.state.programs[idx].active;
           this.state.programs.splice(idx, 1);
+          // If deleted program was active, make first remaining one active
+          if (wasActive && this.state.programs.length > 0) {
+            this.state.programs[0].active = true;
+          }
           this.save();
           this.showToast('Program raderat', 'success');
           this.render();
