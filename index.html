@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gordito">
+  <link rel="manifest" href="manifest.json">
   <title>Gordito Fitness</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <style>
@@ -495,8 +500,58 @@
         };
       },
 
+      // ── IndexedDB cache helper ───────────────────────────────────
+      _idb: null,
+      async _getIDB() {
+        if (this._idb) return this._idb;
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('gordito_cache', 1);
+          req.onupgradeneeded = e => e.target.result.createObjectStore('cache');
+          req.onsuccess  = e => { this._idb = e.target.result; resolve(this._idb); };
+          req.onerror    = () => reject(req.error);
+        });
+      },
+      async _idbGet(key) {
+        try {
+          const db = await this._getIDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction('cache', 'readonly');
+            const req = tx.objectStore('cache').get(key);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror   = () => reject(req.error);
+          });
+        } catch(e) {
+          // Fallback to localStorage if IDB unavailable
+          try { return JSON.parse(localStorage.getItem(key)); } catch(_) { return null; }
+        }
+      },
+      async _idbSet(key, value) {
+        try {
+          const db = await this._getIDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction('cache', 'readwrite');
+            tx.objectStore('cache').put(value, key);
+            tx.oncomplete = () => resolve();
+            tx.onerror    = () => reject(tx.error);
+          });
+        } catch(e) {
+          // Fallback to localStorage
+          try { localStorage.setItem(key, JSON.stringify(value)); } catch(_) {}
+        }
+      },
+      async _idbDel(key) {
+        try {
+          const db = await this._getIDB();
+          return new Promise(resolve => {
+            const tx = db.transaction('cache', 'readwrite');
+            tx.objectStore('cache').delete(key);
+            tx.oncomplete = resolve;
+          });
+        } catch(e) { localStorage.removeItem(key); }
+      },
+      // ─────────────────────────────────────────────────────────────
+
       async loadAPIExercises() {
-        // Load both wger and Free Exercise DB in parallel
         await Promise.allSettled([
           this._loadWger(),
           this._loadFreeExerciseDB()
@@ -504,49 +559,42 @@
       },
 
       async _loadWger() {
-        const CACHE_KEY = 'gordito_wger';
-        const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+        const KEY = 'gordito_wger';
+        const TTL = 7 * 24 * 60 * 60 * 1000;
         try {
-          const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) {
-            const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_TTL) { this._mergeWger(data); return; }
-          }
-        } catch (e) {}
+          const cached = await this._idbGet(KEY);
+          if (cached && Date.now() - cached.timestamp < TTL) { this._mergeWger(cached.data); return; }
+        } catch(e) {}
         try {
           const res = await fetch('https://wger.de/api/v2/exercise/?format=json&language=2&limit=100');
           if (!res.ok) throw new Error();
           const json = await res.json();
           const data = json.results || [];
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+          await this._idbSet(KEY, { data, timestamp: Date.now() });
           this._mergeWger(data);
-        } catch (e) {}
+        } catch(e) {}
       },
 
       async _loadFreeExerciseDB() {
-        const CACHE_KEY = 'gordito_freedb';
-        const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+        const KEY = 'gordito_freedb';
+        const TTL = 7 * 24 * 60 * 60 * 1000;
         try {
-          const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) {
-            const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_TTL) { this._mergeFreeDB(data); return; }
-          }
-        } catch (e) {}
+          const cached = await this._idbGet(KEY);
+          if (cached && Date.now() - cached.timestamp < TTL) { this._mergeFreeDB(cached.data); return; }
+        } catch(e) {}
         try {
           const res = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
           if (!res.ok) throw new Error();
-          const data = await res.json();
-          // Store condensed version with correct field names
-          const slim = data.map(e => ({
+          const raw = await res.json();
+          const data = raw.map(e => ({
             name: e.name,
             primaryMuscles: e.primaryMuscles || [],
             equipment: e.equipment || '',
             category: e.category || ''
           })).filter(e => e.name && e.primaryMuscles.length > 0);
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: slim, timestamp: Date.now() }));
-          this._mergeFreeDB(slim);
-        } catch (e) {}
+          await this._idbSet(KEY, { data, timestamp: Date.now() });
+          this._mergeFreeDB(data);
+        } catch(e) {}
       },
 
       _mergeFreeDB(exercises) {
@@ -709,7 +757,10 @@
 
     // ===== MAIN APP =====
     const app = {
+      CURRENT_VERSION: 3,
+
       state: {
+        _version: 1,
         currentView: 'dashboard',
         userName: 'Tränaren',
         programs: [],
@@ -719,27 +770,55 @@
         customExercises: []
       },
 
+      // ── Migration table ──────────────────────────────────────────
+      // Add a new entry here whenever state shape changes.
+      // Each fn receives state and returns the migrated state.
+      migrations: {
+        2: s => ({ ...s, customExercises: Array.isArray(s.customExercises) ? s.customExercises : [] }),
+        3: s => ({ ...s, workoutHistory: (s.workoutHistory || []).map(w => ({ ...w, passed: w.passed ?? (w.completionPct >= 85) })) })
+      },
+
+      _migrate(state) {
+        let s = { ...state };
+        const from = s._version || 1;
+        for (let v = from + 1; v <= this.CURRENT_VERSION; v++) {
+          if (this.migrations[v]) {
+            try { s = this.migrations[v](s); } catch(e) { console.warn('Migration v' + v + ' failed', e); }
+          }
+          s._version = v;
+        }
+        return s;
+      },
+
       init() {
         const saved = localStorage.getItem('familyfit_state');
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
-            this.state = { ...this.state, ...parsed };
-          } catch (e) {}
+            const migrated = this._migrate(parsed);
+            this.state = { ...this.state, ...migrated };
+          } catch (e) { console.warn('State load failed, using defaults', e); }
         }
-        // Backwards compat: ensure customExercises always exists
+        // Always ensure these fields exist
         if (!Array.isArray(this.state.customExercises)) this.state.customExercises = [];
+        if (!Array.isArray(this.state.programs)) this.state.programs = [];
+        if (!Array.isArray(this.state.workoutHistory)) this.state.workoutHistory = [];
+        this.state._version = this.CURRENT_VERSION;
 
-        // Invalidate old FreeDB cache that has wrong format (null bodyParts)
-        try {
-          const fdb = localStorage.getItem('gordito_freedb');
-          if (fdb) {
-            const { data } = JSON.parse(fdb);
-            if (data && data.length > 0 && !data[0].primaryMuscles) {
-              localStorage.removeItem('gordito_freedb');
+        // Migrate old localStorage API caches → IDB on first run, then remove them
+        ['gordito_wger','gordito_freedb'].forEach(key => {
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              // Validate freedb format
+              if (key === 'gordito_freedb' && parsed.data && parsed.data.length > 0 && !parsed.data[0].primaryMuscles) {
+                localStorage.removeItem(key); return;
+              }
+              WorkoutLibrary._idbSet(key, parsed).then(() => localStorage.removeItem(key));
             }
-          }
-        } catch(e) { localStorage.removeItem('gordito_freedb'); }
+          } catch(e) { localStorage.removeItem(key); }
+        });
 
         // Never reload into mid-session views
         if (this.state.currentView === 'sessionResult' || this.state.currentView === 'workout') {
@@ -747,9 +826,7 @@
         }
         this.render();
         this._apiReady = false;
-        WorkoutLibrary.loadAPIExercises().catch(() => {}).finally(() => {
-          this._apiReady = true;
-        });
+        WorkoutLibrary.loadAPIExercises().catch(() => {}).finally(() => { this._apiReady = true; });
       },
 
       // Escapes user input before injecting into HTML to prevent layout breaks
@@ -1316,26 +1393,30 @@
         html += '</div>';
 
         // ---- Övningsbibliotek ----
+        const builtIn = WorkoutLibrary.getTotalExerciseCount();
         html += '<div class="card">';
         html += '<h4 style="margin:0 0 0.5rem;">📚 Övningsbibliotek</h4>';
-        let wgerStatus = 'Inte laddad', freedbStatus = 'Inte laddad';
-        try {
-          const c1 = localStorage.getItem('gordito_wger');
-          if (c1) { const { data, timestamp } = JSON.parse(c1); const d = Math.floor((Date.now()-timestamp)/86400000); wgerStatus = data.length + ' övn · ' + d + 'd sedan'; }
-        } catch(e) {}
-        try {
-          const c2 = localStorage.getItem('gordito_freedb');
-          if (c2) { const { data, timestamp } = JSON.parse(c2); const d = Math.floor((Date.now()-timestamp)/86400000); freedbStatus = data.length + ' övn · ' + d + 'd sedan'; }
-        } catch(e) {}
-        const builtIn = WorkoutLibrary.getTotalExerciseCount();
-        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin:0.5rem 0 0.75rem;">';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin:0.5rem 0 0.75rem;" id="libStats">';
         html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Inbyggda</div><div style="font-size:0.9rem;font-weight:700;color:var(--primary);">' + builtIn + ' övn</div></div>';
-        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">wger.de</div><div style="font-size:0.78rem;color:var(--primary);">' + wgerStatus + '</div></div>';
-        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Free Exercise DB</div><div style="font-size:0.78rem;color:var(--primary);">' + freedbStatus + '</div></div>';
-        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Egna övningar</div><div style="font-size:0.9rem;font-weight:700;color:var(--secondary);">' + (this.state.customExercises.length) + ' st</div></div>';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">wger.de</div><div id="wgerStat" style="font-size:0.78rem;color:var(--primary);">Laddar…</div></div>';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Free Exercise DB</div><div id="freedbStat" style="font-size:0.78rem;color:var(--primary);">Laddar…</div></div>';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Egna övningar</div><div style="font-size:0.9rem;font-weight:700;color:var(--secondary);">' + this.state.customExercises.length + ' st</div></div>';
         html += '</div>';
         html += '<button onclick="app.reloadAPIExercises()" class="btn-secondary" style="width:100%;">🔄 Uppdatera övningsbibliotek</button>';
         html += '</div>';
+        // Async-fill IDB stats after render
+        Promise.allSettled([
+          WorkoutLibrary._idbGet('gordito_wger'),
+          WorkoutLibrary._idbGet('gordito_freedb')
+        ]).then(([w, f]) => {
+          const fmt = r => r.status==='fulfilled' && r.value
+            ? r.value.data.length + ' övn · ' + Math.floor((Date.now()-r.value.timestamp)/86400000) + 'd sedan'
+            : 'Inte laddad';
+          const ws = document.getElementById('wgerStat');
+          const fs = document.getElementById('freedbStat');
+          if (ws) ws.textContent = fmt(w);
+          if (fs) fs.textContent = fmt(f);
+        });
 
         // ---- Egna övningar ----
         html += '<div class="card">';
@@ -1640,6 +1721,11 @@
       },
 
       async reloadAPIExercises() {
+        await Promise.allSettled([
+          WorkoutLibrary._idbDel('gordito_wger'),
+          WorkoutLibrary._idbDel('gordito_freedb')
+        ]);
+        // Also clear old localStorage remnants
         localStorage.removeItem('gordito_wger');
         localStorage.removeItem('gordito_freedb');
         this.showToast('Hämtar övningar från wger.de & Free Exercise DB...', 'success');
@@ -1809,6 +1895,14 @@
     };
 
     window.addEventListener('DOMContentLoaded', () => app.init());
+
+    // Register Service Worker for offline support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .catch(err => console.warn('SW registration failed:', err));
+      });
+    }
   </script>
 </body>
 </html>
