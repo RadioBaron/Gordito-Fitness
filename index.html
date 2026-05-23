@@ -746,11 +746,33 @@
           this.state.currentView = 'dashboard';
         }
         this.render();
-        WorkoutLibrary.loadAPIExercises().catch(() => {});
+        this._apiReady = false;
+        WorkoutLibrary.loadAPIExercises().catch(() => {}).finally(() => {
+          this._apiReady = true;
+        });
+      },
+
+      // Escapes user input before injecting into HTML to prevent layout breaks
+      esc(str) {
+        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       },
 
       save() {
-        localStorage.setItem('familyfit_state', JSON.stringify(this.state));
+        try {
+          localStorage.setItem('familyfit_state', JSON.stringify(this.state));
+        } catch(e) {
+          if (e.name === 'QuotaExceededError') {
+            // localStorage full – try clearing API caches to free space
+            localStorage.removeItem('gordito_freedb');
+            localStorage.removeItem('gordito_wger');
+            try {
+              localStorage.setItem('familyfit_state', JSON.stringify(this.state));
+              this.showToast('Lagring full – API-cache rensad för att spara data', 'warning');
+            } catch(e2) {
+              this.showToast('⚠️ Kunde inte spara – lagring full!', 'error');
+            }
+          }
+        }
       },
 
       setView(view) {
@@ -762,29 +784,39 @@
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.textContent = msg;
-        document.getElementById('toastContainer').appendChild(toast);
+        const container = document.getElementById('toastContainer');
+        if (container) container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
       },
 
       render() {
-        document.getElementById('bottomNav').classList.remove('hidden');
-
-        let html = '';
-        switch (this.state.currentView) {
-          case 'dashboard': html = this.renderDashboard(); break;
-          case 'programs': html = this.renderPrograms(); break;
-          case 'createProgram': html = this.renderCreateProgram(); break;
-          case 'editProgram': html = this.renderEditProgram(); break;
-          case 'history': html = this.renderHistory(); break;
-          case 'workout': html = this.renderWorkout(); break;
-          case 'sessionResult': html = this.renderSessionResult(); break;
-          case 'programComplete': html = this.renderProgramComplete(); break;
-          case 'more': html = this.renderMore(); break;
-          default: html = this.renderDashboard();
+        try {
+          document.getElementById('bottomNav').classList.remove('hidden');
+          let html = '';
+          switch (this.state.currentView) {
+            case 'dashboard':       html = this.renderDashboard(); break;
+            case 'programs':        html = this.renderPrograms(); break;
+            case 'createProgram':   html = this.renderCreateProgram(); break;
+            case 'editProgram':     html = this.renderEditProgram(); break;
+            case 'history':         html = this.renderHistory(); break;
+            case 'workout':         html = this.renderWorkout(); break;
+            case 'sessionResult':   html = this.renderSessionResult(); break;
+            case 'programComplete': html = this.renderProgramComplete(); break;
+            case 'more':            html = this.renderMore(); break;
+            default:                html = this.renderDashboard();
+          }
+          document.getElementById('content').innerHTML = html;
+          this.updateNav();
+        } catch(err) {
+          // Render error boundary – show recovery screen instead of white screen
+          console.error('Render error:', err);
+          document.getElementById('content').innerHTML =
+            '<div class="card" style="margin-top:2rem;border-color:var(--danger);">' +
+            '<h3 style="color:var(--danger);margin:0 0 0.5rem;">⚠️ Något gick fel</h3>' +
+            '<p class="text-muted" style="margin-bottom:1rem;">Ett oväntat fel uppstod. Försök igen.</p>' +
+            '<button class="btn-primary" onclick="app.setView(\'dashboard\')" style="margin:0;">🏠 Tillbaka till start</button>' +
+            '</div>';
         }
-
-        document.getElementById('content').innerHTML = html;
-        this.updateNav();
       },
 
       updateNav() {
@@ -798,7 +830,7 @@
 
       // ===== DASHBOARD =====
       renderDashboard() {
-        const name = this.state.userName || 'Tränaren';
+        const name = this.esc(this.state.userName || 'Tränaren');
         let activeProgram = this.state.programs.find(p => p.active);
         if (!activeProgram && this.state.programs.length > 0) activeProgram = this.state.programs[0];
 
@@ -829,7 +861,7 @@
           html += '<div class="card" style="margin:1rem 0;">';
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">';
           const ptIcon = (WorkoutLibrary.programTypes[activeProgram.programType] || {}).icon || '🏋️';
-          html += '<div><h4 style="margin:0;">' + ptIcon + ' ' + activeProgram.name + '</h4>';
+          html += '<div><h4 style="margin:0;">' + ptIcon + ' ' + this.esc(activeProgram.name) + '</h4>';
           html += '<p style="color:var(--text-muted);font-size:0.82rem;margin:0.25rem 0 0;">Vecka ' + currentWeek + '/' + activeProgram.weeks + ' · ' + (goalLabels[goal] || goal) + '</p></div>';
           html += '<div style="text-align:right;font-size:0.85rem;color:var(--text-muted);">' + sessionInWeek + '/' + daysPerWeek + ' pass</div>';
           html += '</div>';
@@ -930,7 +962,7 @@
             html += '<div style="display: flex; justify-content: space-between; align-items: start;">';
             html += '<div>';
             const ptIcon = (WorkoutLibrary.programTypes[prog.programType] || {}).icon || '🏋️';
-            html += '<h4 style="margin: 0;">' + ptIcon + ' ' + prog.name + '</h4>';
+            html += '<h4 style="margin: 0;">' + ptIcon + ' ' + this.esc(prog.name) + '</h4>';
             html += '<p class="text-muted">' + prog.weeks + ' veckor • ' + prog.daysPerWeek + ' dagar/vecka</p>';
             html += '<p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">' + prog.type + '</p>';
             html += '<p style="color: var(--primary); margin-top: 0.5rem; font-size: 0.9rem;">Dagar: ' + prog.schedule.length + '</p>';
@@ -1011,11 +1043,11 @@
         if (!prog) return '<h2>Program inte funnet</h2>';
 
         let html = '<button class="btn-secondary" onclick="app.setView(\'programs\')">← Tillbaka</button>';
-        html += '<h2>Redigera: ' + prog.name + '</h2>';
+        html += '<h2>Redigera: ' + this.esc(prog.name) + '</h2>';
         
         html += '<div class="card">';
         html += '<label>Programnamn</label>';
-        html += '<input type="text" id="editProgName" value="' + prog.name + '">';
+        html += '<input type="text" id="editProgName" value="' + this.esc(prog.name) + '">';
         
         html += '<label>Veckor</label>';
         html += '<input type="number" id="editProgWeeks" value="' + prog.weeks + '" min="4" max="24">';
@@ -1278,7 +1310,7 @@
         html += '<div class="card">';
         html += '<h4 style="margin:0 0 0.75rem;">Ditt namn</h4>';
         html += '<div style="display:flex;gap:0.5rem;">';
-        html += '<input type="text" id="userNameInput" value="' + (this.state.userName || '') + '" placeholder="Ange ditt namn" style="margin:0;flex:1;">';
+        html += '<input type="text" id="userNameInput" value="' + this.esc(this.state.userName || '') + '" placeholder="Ange ditt namn" style="margin:0;flex:1;">';
         html += '<button onclick="app.saveName()" class="btn-secondary" style="margin:0;white-space:nowrap;">Spara</button>';
         html += '</div>';
         html += '</div>';
@@ -1379,7 +1411,9 @@
         this.save();
         sessionStorage.removeItem('selectedProgramType');
         sessionStorage.removeItem('selectedDays');
-        this.showToast('Program "' + name + '" skapat! 🎉', 'success');
+        const exCount = newProgram.schedule.reduce((s, d) => s + d.exercises.length, 0);
+        const apiNote = this._apiReady ? '' : ' (API laddar fortfarande)';
+        this.showToast('Program "' + name + '" skapat! ' + exCount + ' övningar' + apiNote + ' 🎉', 'success');
         this.setView('programs');
       },
 
@@ -1737,7 +1771,7 @@
 
         let html = '<div style="text-align:center;padding:2rem 0 1rem;">';
         html += '<div style="font-size:4rem;animation:spin 2s linear infinite;display:inline-block;">🏆</div>';
-        html += '<h2 style="color:var(--primary);margin:1rem 0 0.25rem;">' + (prog ? prog.name : '') + '</h2>';
+        html += '<h2 style="color:var(--primary);margin:1rem 0 0.25rem;">' + this.esc(prog ? prog.name : '') + '</h2>';
         html += '<p style="color:var(--text-muted);">Program avslutat!</p>';
         html += '</div>';
 
