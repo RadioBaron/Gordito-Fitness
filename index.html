@@ -447,6 +447,14 @@
         } else {
           exList = this.exercises[split] || [];
         }
+        // Inject matching custom exercises
+        const custom = (app && app.state && app.state.customExercises) ? app.state.customExercises : [];
+        const matchingCustom = custom.filter(c => {
+          if (split === 'Upper') return ['Push','Pull'].includes(c.split);
+          if (split === 'Lower') return c.split === 'Legs';
+          return c.split === split;
+        });
+        exList = [...exList, ...matchingCustom];
         const shuffled = [...exList].sort(() => Math.random() - 0.5);
         return shuffled.slice(0, Math.min(count, exList.length));
       },
@@ -488,26 +496,78 @@
       },
 
       async loadAPIExercises() {
+        // Load both wger and Free Exercise DB in parallel
+        await Promise.allSettled([
+          this._loadWger(),
+          this._loadFreeExerciseDB()
+        ]);
+      },
+
+      async _loadWger() {
         const CACHE_KEY = 'gordito_wger';
         const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
         try {
           const cached = localStorage.getItem(CACHE_KEY);
           if (cached) {
             const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_TTL) { this._mergeAPI(data); return; }
+            if (Date.now() - timestamp < CACHE_TTL) { this._mergeWger(data); return; }
           }
         } catch (e) {}
         try {
           const res = await fetch('https://wger.de/api/v2/exercise/?format=json&language=2&limit=100');
-          if (!res.ok) throw new Error('HTTP ' + res.status);
+          if (!res.ok) throw new Error();
           const json = await res.json();
           const data = json.results || [];
           localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-          this._mergeAPI(data);
-        } catch (e) { /* Use built-in exercises */ }
+          this._mergeWger(data);
+        } catch (e) {}
       },
 
-      _mergeAPI(exercises) {
+      async _loadFreeExerciseDB() {
+        const CACHE_KEY = 'gordito_freedb';
+        const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+        try {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (Date.now() - timestamp < CACHE_TTL) { this._mergeFreeDB(data); return; }
+          }
+        } catch (e) {}
+        try {
+          const res = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          // Store condensed version to save localStorage space
+          const slim = data.map(e => ({ name: e.name, bodyPart: e.bodyPart, equipment: e.equipment, target: e.target }));
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: slim, timestamp: Date.now() }));
+          this._mergeFreeDB(slim);
+        } catch (e) {}
+      },
+
+      _mergeFreeDB(exercises) {
+        const bodyPartMap = {
+          'chest': 'Push', 'shoulders': 'Push', 'triceps': 'Push',
+          'back': 'Pull', 'lats': 'Pull', 'biceps': 'Pull',
+          'upper legs': 'Legs', 'lower legs': 'Legs', 'glutes': 'Legs',
+          'waist': 'BW_Core', 'cardio': 'Cardio_Interval'
+        };
+        const eqMap = {
+          'barbell': 'Barbell', 'dumbbell': 'Dumbbell', 'body weight': 'Bodyweight',
+          'kettlebell': 'Kettlebell', 'cable': 'Cable', 'band': 'Band', 'machine': 'Machine'
+        };
+        exercises.forEach(ex => {
+          if (!ex.name || ex.name.length < 3) return;
+          const target = bodyPartMap[(ex.bodyPart || '').toLowerCase()];
+          if (!target || !this.exercises[target]) return;
+          const nameLower = ex.name.toLowerCase();
+          if (this.exercises[target].find(e => e.name.toLowerCase() === nameLower)) return;
+          const eq = eqMap[(ex.equipment || '').toLowerCase()] || 'Other';
+          const muscleName = ex.target ? ex.target.charAt(0).toUpperCase() + ex.target.slice(1) : 'General';
+          this.exercises[target].push({ name: ex.name, muscle: muscleName, type: eq, sets: 3, reps: '8-12', difficulty: 'Medium', source: 'freedb' });
+        });
+      },
+
+      _mergeWger(exercises) {
         const catMap = { 11: 'Push', 13: 'Push', 12: 'Pull', 8: 'Pull', 9: 'Legs', 14: 'Legs', 10: 'BW_Core' };
         const eqMap = { 1: 'Barbell', 3: 'Dumbbell', 7: 'Bodyweight', 10: 'Kettlebell' };
         exercises.forEach(ex => {
@@ -519,6 +579,10 @@
           const muscleName = [12,8].includes(ex.category) ? 'Back' : [9,14].includes(ex.category) ? 'Legs' : ex.category === 10 ? 'Core' : 'Chest';
           this.exercises[target].push({ name: ex.name, muscle: muscleName, type: eq, sets: 3, reps: '8-12', difficulty: 'Medium', source: 'wger' });
         });
+      },
+
+      getTotalExerciseCount() {
+        return Object.values(this.exercises).reduce((sum, arr) => sum + arr.length, 0);
       }
     };
 
@@ -641,7 +705,8 @@
         programs: [],
         currentWorkout: null,
         workoutHistory: [],
-        lastSessionResult: null
+        lastSessionResult: null,
+        customExercises: []
       },
 
       init() {
@@ -1195,26 +1260,61 @@
         html += '</div>';
         html += '</div>';
 
+        // ---- Övningsbibliotek ----
         html += '<div class="card">';
-        html += '<h4 style="margin:0 0 0.5rem;">Övningsbibliotek</h4>';
-        html += '<p class="text-muted" style="font-size:0.85rem;">150+ övningar inbyggda · Hämtar extra från wger.de (gratis)</p>';
-        let wgerStatus = 'Inte laddad';
+        html += '<h4 style="margin:0 0 0.5rem;">📚 Övningsbibliotek</h4>';
+        let wgerStatus = 'Inte laddad', freedbStatus = 'Inte laddad';
         try {
-          const cached = localStorage.getItem('gordito_wger');
-          if (cached) {
-            const { data, timestamp } = JSON.parse(cached);
-            const daysOld = Math.floor((Date.now() - timestamp) / 86400000);
-            wgerStatus = data.length + ' övningar · laddad ' + daysOld + ' dag(ar) sedan';
-          }
+          const c1 = localStorage.getItem('gordito_wger');
+          if (c1) { const { data, timestamp } = JSON.parse(c1); const d = Math.floor((Date.now()-timestamp)/86400000); wgerStatus = data.length + ' övn · ' + d + 'd sedan'; }
         } catch(e) {}
-        html += '<p style="font-size:0.82rem;color:var(--primary);margin:0.5rem 0 0.75rem;">Status: ' + wgerStatus + '</p>';
+        try {
+          const c2 = localStorage.getItem('gordito_freedb');
+          if (c2) { const { data, timestamp } = JSON.parse(c2); const d = Math.floor((Date.now()-timestamp)/86400000); freedbStatus = data.length + ' övn · ' + d + 'd sedan'; }
+        } catch(e) {}
+        const builtIn = WorkoutLibrary.getTotalExerciseCount();
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin:0.5rem 0 0.75rem;">';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Inbyggda</div><div style="font-size:0.9rem;font-weight:700;color:var(--primary);">' + builtIn + ' övn</div></div>';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">wger.de</div><div style="font-size:0.78rem;color:var(--primary);">' + wgerStatus + '</div></div>';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Free Exercise DB</div><div style="font-size:0.78rem;color:var(--primary);">' + freedbStatus + '</div></div>';
+        html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;"><div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">Egna övningar</div><div style="font-size:0.9rem;font-weight:700;color:var(--secondary);">' + (this.state.customExercises.length) + ' st</div></div>';
+        html += '</div>';
         html += '<button onclick="app.reloadAPIExercises()" class="btn-secondary" style="width:100%;">🔄 Uppdatera övningsbibliotek</button>';
         html += '</div>';
 
+        // ---- Egna övningar ----
+        html += '<div class="card">';
+        html += '<h4 style="margin:0 0 0.75rem;">✏️ Lägg till egen övning</h4>';
+        html += '<input type="text" id="customExName" placeholder="Namn på övning (t.ex. Face Pull)" style="margin-bottom:0.5rem;">';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">';
+        html += '<select id="customExSplit"><option value="Push">Push (bröst/axlar/triceps)</option><option value="Pull">Pull (rygg/biceps)</option><option value="Legs">Ben</option><option value="BW_Core">Core/Mage</option><option value="HIIT_Full">HIIT</option><option value="Cardio_Interval">Kondition</option></select>';
+        html += '<select id="customExEq"><option value="Barbell">Skivstång</option><option value="Dumbbell">Hantel</option><option value="Bodyweight">Kroppsvikt</option><option value="Cable">Kabel</option><option value="Machine">Maskin</option><option value="Band">Band</option><option value="Other">Annat</option></select>';
+        html += '</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem;">';
+        html += '<input type="number" id="customExSets" placeholder="Sets (t.ex. 3)" min="1" max="10">';
+        html += '<input type="text" id="customExReps" placeholder="Reps (t.ex. 8-12)">';
+        html += '</div>';
+        html += '<button onclick="app.addCustomExercise()" class="btn-primary" style="margin:0;">+ Lägg till övning</button>';
+        html += '</div>';
+
+        // List custom exercises
+        if (this.state.customExercises.length > 0) {
+          html += '<div class="card">';
+          html += '<h4 style="margin:0 0 0.75rem;">Mina övningar (' + this.state.customExercises.length + ')</h4>';
+          this.state.customExercises.forEach((ex, i) => {
+            html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #2d3748;">';
+            html += '<div><strong style="font-size:0.9rem;">' + ex.name + '</strong>';
+            html += '<div style="font-size:0.75rem;color:var(--text-muted);">' + ex.split + ' · ' + ex.type + ' · ' + ex.sets + '×' + ex.reps + '</div></div>';
+            html += '<button onclick="app.deleteCustomExercise(' + i + ')" style="background:var(--danger);color:#fff;border:none;border-radius:0.4rem;padding:0.3rem 0.6rem;font-size:0.75rem;cursor:pointer;">✕</button>';
+            html += '</div>';
+          });
+          html += '</div>';
+        }
+
         html += '<div class="card">';
         html += '<h4 style="margin:0 0 0.5rem;">Om appen</h4>';
-        html += '<p class="text-muted" style="font-size:0.85rem;">Version 7.0 · All data sparas lokalt på din enhet</p>';
-        html += '<p class="text-muted" style="margin-top:0.5rem;font-size:0.85rem;">✅ 6 träningstyper &nbsp; ✅ Progression Engine<br>✅ Veckoanalys &nbsp; ✅ Offline-first &nbsp; ✅ wger API</p>';
+        html += '<p class="text-muted" style="font-size:0.85rem;">Version 8.0 · All data sparas lokalt på din enhet</p>';
+        html += '<p class="text-muted" style="margin-top:0.5rem;font-size:0.85rem;">✅ 6 träningstyper &nbsp; ✅ Progression Engine<br>✅ wger API &nbsp; ✅ Free Exercise DB &nbsp; ✅ Egna övningar</p>';
         html += '</div>';
 
         html += '<div class="card" style="border-color:var(--danger);">';
@@ -1480,9 +1580,36 @@
 
       async reloadAPIExercises() {
         localStorage.removeItem('gordito_wger');
-        this.showToast('Hämtar övningar från wger.de...', 'success');
+        localStorage.removeItem('gordito_freedb');
+        this.showToast('Hämtar övningar från wger.de & Free Exercise DB...', 'success');
         await WorkoutLibrary.loadAPIExercises();
-        this.showToast('Övningsbibliotek uppdaterat! ✅', 'success');
+        const total = WorkoutLibrary.getTotalExerciseCount();
+        this.showToast('Övningsbibliotek uppdaterat! ' + total + ' övningar ✅', 'success');
+        this.render();
+      },
+
+      addCustomExercise() {
+        const name = (document.getElementById('customExName').value || '').trim();
+        const split = document.getElementById('customExSplit').value;
+        const type  = document.getElementById('customExEq').value;
+        const sets  = parseInt(document.getElementById('customExSets').value) || 3;
+        const reps  = (document.getElementById('customExReps').value || '8-12').trim();
+        if (!name) { this.showToast('Ange ett namn på övningen!', 'error'); return; }
+        if (this.state.customExercises.find(e => e.name.toLowerCase() === name.toLowerCase())) {
+          this.showToast('En övning med det namnet finns redan!', 'error'); return;
+        }
+        this.state.customExercises.push({ name, split, type, sets, reps, muscle: split, difficulty: 'Medium', source: 'custom' });
+        this.save();
+        this.showToast('✅ ' + name + ' tillagd!', 'success');
+        this.render();
+      },
+
+      deleteCustomExercise(index) {
+        const ex = this.state.customExercises[index];
+        if (!ex) return;
+        this.state.customExercises.splice(index, 1);
+        this.save();
+        this.showToast('🗑 ' + ex.name + ' borttagen', 'success');
         this.render();
       },
 
