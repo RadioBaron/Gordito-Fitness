@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10b981">
+  <title>Integritetspolicy – Gordito Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #0f1419; color: #fff; padding: 0; min-height: 100vh; }
+    :root { --primary: #10b981; --text-muted: #94a3b8; --card-bg: #1e293b; }
+    header { background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    header a { color: var(--primary); text-decoration: none; font-size: 0.9rem; }
+    header h1 { font-size: 1.1rem; color: var(--primary); }
+    .content { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    h2 { font-size: 1.6rem; color: var(--primary); margin: 0 0 0.5rem; }
+    .updated { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem; }
+    .summary-box { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
+    .summary-box p { font-size: 1rem; line-height: 1.6; }
+    .summary-box strong { color: var(--primary); }
+    section { margin-bottom: 2rem; }
+    section h3 { font-size: 1.1rem; color: #fff; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #2d3748; }
+    section p, section li { color: var(--text-muted); font-size: 0.92rem; line-height: 1.7; margin-bottom: 0.5rem; }
+    section ul { padding-left: 1.25rem; }
+    section ul li { margin-bottom: 0.35rem; }
+    .highlight { background: var(--card-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; margin: 0.75rem 0; }
+    .highlight p { margin: 0; }
+    footer { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid #2d3748; margin-top: 2rem; }
+    a { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html">← Tillbaka till appen</a>
+    <h1>Integritetspolicy</h1>
+  </header>
+
+  <div class="content">
+    <h2>Integritetspolicy</h2>
+    <p class="updated">Senast uppdaterad: maj 2026</p>
+
+    <div class="summary-box">
+      <p>
+        <strong>Kort och gott:</strong> Gordito Fitness samlar inte in, lagrar inte och
+        delar inte din personliga data. All information om din träning stannar
+        på <strong>din enhet</strong> – vi har ingen server, inget konto och ingen
+        molntjänst.
+      </p>
+    </div>
+
+    <section>
+      <h3>1. Vilken data samlar vi in?</h3>
+      <p>
+        Gordito Fitness samlar <strong>ingen personlig data</strong>. Appen fungerar
+        helt offline och lagrar all information lokalt i webbläsarens
+        <code>localStorage</code> och <code>IndexedDB</code> – enbart på din enhet.
+      </p>
+      <p>Data som lagras lokalt på din enhet:</p>
+      <ul>
+        <li>Ditt namn (valfritt, används enbart för välkomsthälsning)</li>
+        <li>Träningsprogram och schema</li>
+        <li>Träningshistorik och resultat</li>
+        <li>Egna övningar du lägger till</li>
+        <li>Appinställningar (mål, streaks m.m.)</li>
+        <li>Cache av övningsdatabas från tredjepartstjänster (se nedan)</li>
+      </ul>
+      <p>
+        Ingen av denna data skickas till oss eller till någon tredje part.
+      </p>
+    </section>
+
+    <section>
+      <h3>2. Tredjepartstjänster</h3>
+      <p>
+        Appen hämtar övningsdata från två öppna databaser för att utöka
+        övningsbiblioteket. Inga personuppgifter skickas vid dessa förfrågningar.
+      </p>
+      <div class="highlight">
+        <p><strong>wger.de</strong> – öppen träningsdatabas<br>
+        <a href="https://wger.de" target="_blank" rel="noopener">https://wger.de</a><br>
+        Vi hämtar anonymt övningsnamn och beskrivningar. Din IP-adress kan loggas av deras server precis som vid alla HTTP-anrop.</p>
+      </div>
+      <div class="highlight">
+        <p><strong>Free Exercise DB (GitHub)</strong><br>
+        <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">github.com/yuhonas/free-exercise-db</a><br>
+        En öppen övningsdatabas. Datan hämtas från GitHub:s CDN och cachas lokalt.</p>
+      </div>
+      <p>
+        Vi använder Google Fonts för typsnitt. Google kan logga din IP vid
+        nedladdning av teckensnittsfiler.
+      </p>
+    </section>
+
+    <section>
+      <h3>3. Cookies</h3>
+      <p>
+        Gordito Fitness använder <strong>inga cookies</strong>. Vi använder
+        <code>localStorage</code> och <code>IndexedDB</code> (webbläsarlagring) för
+        appens interna data. Dessa filer lämnar aldrig din enhet.
+      </p>
+    </section>
+
+    <section>
+      <h3>4. Dina rättigheter</h3>
+      <p>
+        Du har full kontroll över din data:
+      </p>
+      <ul>
+        <li>Du kan radera all data via <strong>Mer → Återställ all data</strong> i appen.</li>
+        <li>Du kan radera webbläsarens localStorage och IndexedDB manuellt i din webbläsares utvecklarverktyg.</li>
+        <li>Avinstallation av appen (om installerad som PWA) tar bort all lokal data.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>5. Ändringar av denna policy</h3>
+      <p>
+        Om vi uppdaterar integritetspolicyn ändrar vi datumet längst upp på
+        denna sida. Vid väsentliga ändringar visas en notis i appen.
+      </p>
+    </section>
+
+    <section>
+      <h3>6. Kontakt</h3>
+      <p>
+        Har du frågor om integritet och dataskydd? Kontakta oss på:<br>
+        <a href="mailto:gordito@radiobaron.se">gordito@radiobaron.se</a>
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    <p>Gordito Fitness &copy; 2026 · <a href="index.html">Tillbaka till appen</a></p>
+  </footer>
+</body>
+</html>
