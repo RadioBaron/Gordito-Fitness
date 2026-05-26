@@ -105,6 +105,10 @@
       .grid-2, .grid-3 { grid-template-columns: 1fr; }
     }
 
+    /* ── View transition ── */
+    @keyframes viewSlide { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
+    .view-animate { animation: viewSlide 0.22s ease-out; }
+
     /* ── Onboarding ── */
     .goal-card { background:var(--card-bg); border:2px solid #333; border-radius:0.75rem; padding:1.25rem 1rem; text-align:center; cursor:pointer; transition:0.2s; }
     .goal-card.selected { border-color:var(--primary); background:rgba(16,185,129,0.12); }
@@ -192,6 +196,7 @@
         styrka:       { name: 'Styrka & Hypertrofi', desc: 'Push/Pull/Legs med skivstång och hantlar', icon: '🏋️', days: [3,4,5,6], defaultGoal: 'hypertrophy' },
         helkropp:     { name: 'Helkropp',            desc: 'Hela kroppen varje pass – perfekt för nybörjare', icon: '💪', days: [2,3], defaultGoal: 'strength' },
         kroppsvikt:   { name: 'Kroppsvikt',          desc: 'Ingen utrustning – träna var som helst', icon: '🤸', days: [3,4,5], defaultGoal: 'hypertrophy' },
+        pappakraft:   { name: 'Pappakraft 40+',       desc: 'Tunga basövningar – bibehåll muskler och testosteron', icon: '👨', days: [3,4], defaultGoal: 'strength' },
         powerlifting: { name: 'Powerlifting',         desc: 'Squat, Bänkpress och Marklyft – maxstyrka', icon: '🦁', days: [3,4], defaultGoal: 'strength' },
         hiit:         { name: 'HIIT',                desc: 'Högintensiva intervaller – bränner fett snabbt', icon: '🔥', days: [3,4], defaultGoal: 'conditioning' },
         kondition:    { name: 'Kondition',            desc: 'Löpning, cykling och uthållighetsträning', icon: '🏃', days: [3,4,5], defaultGoal: 'conditioning' }
@@ -241,6 +246,12 @@
                days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] },
           5: { name: 'Kondition 5x/vecka', focus: 'Ambitiöst löpprogram',
                days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Lätt jogg', split:'Cardio_Easy' }, { day:'Onsdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] }
+        },
+        pappakraft: {
+          3: { name: 'Pappakraft Tung (3x/vecka)', focus: 'Tunga basövningar 3–5 reps – maximal testosteron- och tillväxthormonstimulans',
+               days: [{ day:'Måndag', muscle:'Knäböj-fokus (Squat + Press)', split:'Pappa_A' }, { day:'Onsdag', muscle:'Marklyft-fokus (Hinge + Pull)', split:'Pappa_B' }, { day:'Fredag', muscle:'Press-fokus (Överkropp)', split:'Pappa_C' }] },
+          4: { name: 'Pappakraft Upper/Lower (4x/vecka)', focus: 'Överkropp/Underkropp med tung skivstång – optimalt för testosteronnivåer',
+               days: [{ day:'Måndag', muscle:'Underkropp Tung', split:'Pappa_Legs' }, { day:'Tisdag', muscle:'Överkropp Tung', split:'Pappa_Upper' }, { day:'Torsdag', muscle:'Underkropp Tung', split:'Pappa_Legs' }, { day:'Fredag', muscle:'Överkropp Tung', split:'Pappa_Upper' }] }
         }
       },
 
@@ -452,10 +463,47 @@
           { name: 'Lätt cykling', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '20 min', difficulty: 'Easy' },
           { name: 'Återhämtningsjogg', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '20 min', difficulty: 'Easy' },
           { name: 'Promenad + stretching', muscle: 'Kondition', type: 'Cardio', sets: 1, reps: '30 min', difficulty: 'Easy' }
+        ],
+
+        // ── Pappakraft 40+ – tunga basövningar i prioritetsordning ──
+        Pappa_A: [
+          { name: 'Knäböj (Skivstång)', muscle: 'Ben', type: 'Barbell', sets: 5, reps: '3-5', difficulty: 'Heavy' },
+          { name: 'Bänkpress (Skivstång)', muscle: 'Bröst', type: 'Barbell', sets: 4, reps: '4-6', difficulty: 'Heavy' },
+          { name: 'Skivstångsrodd', muscle: 'Rygg', type: 'Barbell', sets: 4, reps: '4-6', difficulty: 'Heavy' },
+          { name: 'Militärpress (Stående)', muscle: 'Axlar', type: 'Barbell', sets: 3, reps: '5-7', difficulty: 'Heavy' },
+          { name: 'Plankan', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '60s', difficulty: 'Medium' }
+        ],
+        Pappa_B: [
+          { name: 'Marklyft (Konventionell)', muscle: 'Rygg', type: 'Barbell', sets: 4, reps: '3-5', difficulty: 'Heavy' },
+          { name: 'Chins / Pull-ups (Viktade)', muscle: 'Rygg', type: 'Bodyweight', sets: 4, reps: '4-6', difficulty: 'Heavy' },
+          { name: 'Lutande Bänkpress', muscle: 'Bröst', type: 'Barbell', sets: 3, reps: '5-7', difficulty: 'Heavy' },
+          { name: 'Rumänsk Marklyft', muscle: 'Hamstrings', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Skivstångscurl', muscle: 'Biceps', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' }
+        ],
+        Pappa_C: [
+          { name: 'Frontknäböj', muscle: 'Ben', type: 'Barbell', sets: 4, reps: '4-6', difficulty: 'Heavy' },
+          { name: 'Skulderpress Hantlar (Stående)', muscle: 'Axlar', type: 'Dumbbell', sets: 4, reps: '5-8', difficulty: 'Heavy' },
+          { name: 'Dips (Viktad)', muscle: 'Triceps', type: 'Bodyweight', sets: 3, reps: '5-8', difficulty: 'Heavy' },
+          { name: 'Hängande Benlyft', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '8-12', difficulty: 'Medium' },
+          { name: 'Rygglyft (Hyperextension)', muscle: 'Rygg', type: 'Bodyweight', sets: 3, reps: '12-15', difficulty: 'Medium' }
+        ],
+        Pappa_Legs: [
+          { name: 'Knäböj (Skivstång)', muscle: 'Ben', type: 'Barbell', sets: 5, reps: '3-5', difficulty: 'Heavy' },
+          { name: 'Rumänsk Marklyft', muscle: 'Hamstrings', type: 'Barbell', sets: 4, reps: '5-6', difficulty: 'Heavy' },
+          { name: 'Bulgarisk Split Squat', muscle: 'Ben', type: 'Dumbbell', sets: 3, reps: '6-8', difficulty: 'Medium' },
+          { name: 'Benpress', muscle: 'Quadriceps', type: 'Machine', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Vadpress (Stående)', muscle: 'Calves', type: 'Machine', sets: 4, reps: '8-12', difficulty: 'Medium' }
+        ],
+        Pappa_Upper: [
+          { name: 'Bänkpress (Skivstång)', muscle: 'Bröst', type: 'Barbell', sets: 5, reps: '3-5', difficulty: 'Heavy' },
+          { name: 'Marklyft (Sumo)', muscle: 'Rygg', type: 'Barbell', sets: 4, reps: '3-5', difficulty: 'Heavy' },
+          { name: 'Militärpress (Stående)', muscle: 'Axlar', type: 'Barbell', sets: 4, reps: '4-6', difficulty: 'Heavy' },
+          { name: 'Chins / Pull-ups (Viktade)', muscle: 'Rygg', type: 'Bodyweight', sets: 4, reps: '4-6', difficulty: 'Heavy' },
+          { name: 'Skivstångscurl', muscle: 'Biceps', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' }
         ]
       },
 
-      getExercises(split, count = 5) {
+      getExercises(split, count = 5, ordered = false) {
         let exList;
         if (split === 'Upper') {
           exList = [...(this.exercises.Push || []), ...(this.exercises.Pull || [])];
@@ -464,16 +512,18 @@
         } else {
           exList = this.exercises[split] || [];
         }
-        // Inject matching custom exercises
-        const custom = (app && app.state && app.state.customExercises) ? app.state.customExercises : [];
-        const matchingCustom = custom.filter(c => {
-          if (split === 'Upper') return ['Push','Pull'].includes(c.split);
-          if (split === 'Lower') return c.split === 'Legs';
-          return c.split === split;
-        });
-        exList = [...exList, ...matchingCustom];
-        const shuffled = [...exList].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, Math.min(count, exList.length));
+        // Inject matching custom exercises (not for Pappa splits)
+        if (!split.startsWith('Pappa_')) {
+          const custom = (app && app.state && app.state.customExercises) ? app.state.customExercises : [];
+          const matchingCustom = custom.filter(c => {
+            if (split === 'Upper') return ['Push','Pull'].includes(c.split);
+            if (split === 'Lower') return c.split === 'Legs';
+            return c.split === split;
+          });
+          exList = [...exList, ...matchingCustom];
+        }
+        const result = ordered ? exList : [...exList].sort(() => Math.random() - 0.5);
+        return result.slice(0, Math.min(count, result.length));
       },
 
       getTemplate(programType, daysPerWeek) {
@@ -485,13 +535,14 @@
       createProgram(daysPerWeek, name, weeks = 8, goal = 'hypertrophy', programType = 'styrka') {
         const template = this.getTemplate(programType, daysPerWeek);
         const isCardio = ['hiit', 'kondition'].includes(programType);
+        const isPappa = programType === 'pappakraft';
         const exCount = isCardio ? 5 : (daysPerWeek <= 3 ? 4 : 5);
 
         const schedule = template.days.map(day => ({
           day: day.day,
           muscle: day.muscle,
           split: day.split,
-          exercises: this.getExercises(day.split, exCount)
+          exercises: this.getExercises(day.split, isPappa ? 5 : exCount, isPappa)
         }));
 
         return {
@@ -770,7 +821,7 @@
     // ===== MAIN APP =====
     const app = {
       CURRENT_VERSION: 4,
-      FREE_PROGRAM_TYPES: ['styrka', 'helkropp', 'kroppsvikt'],
+      FREE_PROGRAM_TYPES: ['styrka', 'helkropp', 'kroppsvikt', 'pappakraft'],
 
       state: {
         _version: 1,
@@ -833,6 +884,8 @@
         if (typeof this.state.isPremium !== 'boolean')      this.state.isPremium = false;
         if (typeof this.state.currentStreak !== 'number')   this.state.currentStreak = 0;
         if (typeof this.state.longestStreak !== 'number')   this.state.longestStreak = 0;
+        if (typeof this.state.notificationsEnabled !== 'boolean') this.state.notificationsEnabled = false;
+        if (!this.state.notificationTime) this.state.notificationTime = '08:00';
         this.state._version = this.CURRENT_VERSION;
 
         // Migrate old localStorage API caches → IDB on first run, then remove them
@@ -859,6 +912,10 @@
         this.render();
         this._apiReady = false;
         WorkoutLibrary.loadAPIExercises().catch(() => {}).finally(() => { this._apiReady = true; });
+        // Schedule notification if enabled
+        if (this.state.notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          this.scheduleNotification();
+        }
       },
 
       // Escapes user input before injecting into HTML to prevent layout breaks
@@ -919,7 +976,15 @@
             case 'more':            html = this.renderMore(); break;
             default:                html = this.renderDashboard();
           }
-          document.getElementById('content').innerHTML = html;
+          const content = document.getElementById('content');
+          const viewChanged = this.state.currentView !== this._lastRenderedView;
+          this._lastRenderedView = this.state.currentView;
+          content.innerHTML = html;
+          if (viewChanged) {
+            content.classList.remove('view-animate');
+            void content.offsetWidth; // force reflow to restart animation
+            content.classList.add('view-animate');
+          }
           // Hide share button if no share API available
           const shareBtn = document.getElementById('shareBtn');
           if (shareBtn && !navigator.share && !navigator.clipboard) shareBtn.style.display = 'none';
@@ -1596,6 +1661,30 @@
           html += '</div>';
         }
 
+        // Notifications section
+        html += '<div class="card">';
+        html += '<h4 style="margin:0 0 0.5rem;">🔔 Träningspåminnelser</h4>';
+        if (typeof Notification === 'undefined') {
+          html += '<p class="text-muted" style="font-size:0.85rem;">Notiser stöds inte av din webbläsare. Installera appen som PWA för full support.</p>';
+        } else if (Notification.permission === 'denied') {
+          html += '<p class="text-muted" style="font-size:0.85rem;">Tillstånd nekat. Ändra i webbläsarens inställningar för att aktivera.</p>';
+        } else if (!this.state.notificationsEnabled) {
+          html += '<p class="text-muted" style="font-size:0.85rem;margin-bottom:0.75rem;">Få en daglig påminnelse om att träna, med info om dagens pass.</p>';
+          html += '<button onclick="app.requestNotifications()" class="btn-primary" style="margin:0;">Aktivera dagliga påminnelser</button>';
+        } else {
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">';
+          html += '<span style="color:var(--primary);font-size:0.9rem;">✅ Aktiva</span>';
+          html += '<button onclick="app.disableNotifications()" class="btn-secondary btn-small" style="margin:0;">Stäng av</button>';
+          html += '</div>';
+          html += '<label style="margin-top:0;">Påminnelsetid</label>';
+          html += '<div style="display:flex;gap:0.5rem;align-items:center;">';
+          html += '<input type="time" id="notifTime" value="' + this.esc(this.state.notificationTime || '08:00') + '" style="flex:1;margin:0;">';
+          html += '<button onclick="app.saveNotificationTime()" class="btn-secondary" style="margin:0;white-space:nowrap;">Spara</button>';
+          html += '</div>';
+          html += '<p style="color:var(--text-muted);font-size:0.76rem;margin-top:0.6rem;">💡 Appen behöver vara öppen i bakgrunden. Installera som PWA för bästa upplevelse.</p>';
+        }
+        html += '</div>';
+
         // Premium section
         if (this.state.isPremium) {
           html += '<div class="card" style="border-color:var(--primary);">';
@@ -1865,6 +1954,74 @@
         const ex = this.state.currentWorkout.exercises[exIdx];
         ex.completed = Array.from({ length: ex.sets }, (_, i) => i + 1);
         this.render();
+      },
+
+      // ===== NOTIFICATIONS =====
+      async requestNotifications() {
+        if (!('Notification' in window)) {
+          this.showToast('Notiser stöds inte i denna webbläsare', 'error'); return;
+        }
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          this.state.notificationsEnabled = true;
+          this.save();
+          this.scheduleNotification();
+          this.showToast('🔔 Påminnelser aktiverade!', 'success');
+          this.render();
+        } else {
+          this.showToast('Tillstånd nekades – kontrollera webbläsarens inställningar', 'warning');
+        }
+      },
+
+      disableNotifications() {
+        this.state.notificationsEnabled = false;
+        this.save();
+        if (this._notifTimeout) { clearTimeout(this._notifTimeout); this._notifTimeout = null; }
+        this.showToast('Påminnelser avaktiverade', 'success');
+        this.render();
+      },
+
+      saveNotificationTime() {
+        const t = document.getElementById('notifTime');
+        if (!t) return;
+        this.state.notificationTime = t.value;
+        this.save();
+        if (this._notifTimeout) { clearTimeout(this._notifTimeout); this._notifTimeout = null; }
+        this.scheduleNotification();
+        this.showToast('Tid sparad: ' + t.value + ' 🔔', 'success');
+      },
+
+      scheduleNotification() {
+        if (!this.state.notificationsEnabled || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+        if (this._notifTimeout) clearTimeout(this._notifTimeout);
+        const now = new Date();
+        const [h, m] = (this.state.notificationTime || '08:00').split(':').map(Number);
+        const target = new Date(now);
+        target.setHours(h, m, 0, 0);
+        if (target <= now) target.setDate(target.getDate() + 1); // already passed today → tomorrow
+        const msUntil = target - now;
+        this._notifTimeout = setTimeout(() => {
+          this._showNotification();
+          this.scheduleNotification(); // re-schedule for next day
+        }, msUntil);
+      },
+
+      _showNotification() {
+        const prog = this.state.programs.find(p => p.active) || this.state.programs[0];
+        if (!prog) return;
+        const dayIdx = (prog.currentDayInWeek || 0) % prog.schedule.length;
+        const nextDay = prog.schedule[dayIdx];
+        const name = this.state.userName || 'Tränaren';
+        const title = 'Dags att träna! 💪';
+        const body = name + ', idag är det ' + (nextDay.muscle || nextDay.day) + '. Kör hårt!';
+        const opts = { body, icon: '/icons/icon-192.svg', badge: '/icons/icon-192.svg', tag: 'workout-reminder', vibrate: [200, 100, 200] };
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.ready.then(reg => reg.showNotification(title, opts)).catch(() => {});
+        } else if ('Notification' in window) {
+          new Notification(title, opts);
+        }
+        this.state.lastNotifDate = new Date().toISOString().slice(0, 10);
+        this.save();
       },
 
       updateStreak() {

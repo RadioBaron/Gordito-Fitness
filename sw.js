@@ -25,6 +25,18 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Notification click – open or focus the app window
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      const existing = list.find(c => c.url.includes('/index.html') || c.url.endsWith('/'));
+      if (existing) return existing.focus();
+      return clients.openWindow('/index.html');
+    })
+  );
+});
+
 // Fetch – network first, fall back to cache
 self.addEventListener('fetch', e => {
   // Skip non-GET and chrome-extension requests
