@@ -53,10 +53,12 @@
     
     .text-muted { color: var(--text-muted); font-size: 0.9rem; }
     .hidden { display: none !important; }
-    .logout-btn { background: var(--danger); color: white; }
-    
+
     .toast-container { position: fixed; bottom: 100px; left: 1rem; right: 1rem; z-index: 1000; max-width: 500px; }
     .toast { background: var(--card-bg); border-left: 4px solid var(--primary); color: #fff; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; animation: slideIn 0.3s; }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--accent); }
+    .toast.success { border-left-color: var(--primary); }
     @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
     
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -1044,8 +1046,6 @@
           const currentWeek = activeProgram.currentWeek || 1;
           const sessionInWeek = activeProgram.currentDayInWeek || 0;
           const daysPerWeek = activeProgram.daysPerWeek;
-
-          html += '<button class="btn-primary" onclick="app.startWorkout()">▶ Starta träning</button>';
 
           // Week progress bar
           html += '<div class="card" style="margin:1rem 0;">';
