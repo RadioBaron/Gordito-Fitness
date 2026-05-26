@@ -2,6 +2,7 @@ const CACHE_NAME = 'gordito-v2';
 const ASSETS = [
   '/',
   '/index.html',
+  '/privacy.html',
   '/icons/icon-192.svg',
   '/icons/icon-512.svg',
   'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap'

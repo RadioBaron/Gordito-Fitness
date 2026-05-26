@@ -179,10 +179,11 @@
     <div id="content"></div>
     
     <div id="bottomNav" class="hidden">
-      <button class="nav-item active" onclick="app.setView('dashboard')"><span>📅</span><div>Workout</div></button>
-      <button class="nav-item" onclick="app.setView('programs')"><span>📊</span><div>Program</div></button>
-      <button class="nav-item" onclick="app.setView('history')"><span>📈</span><div>Historia</div></button>
-      <button class="nav-item" onclick="app.setView('more')"><span>⋯</span><div>Mer</div></button>
+      <button class="nav-item active" onclick="app.setView('dashboard')"><span>📅</span><div id="nav-workout">Workout</div></button>
+      <button class="nav-item" onclick="app.setView('programs')"><span>📊</span><div id="nav-program">Program</div></button>
+      <button class="nav-item" onclick="app.setView('history')"><span>📈</span><div id="nav-history">Historia</div></button>
+      <button class="nav-item" onclick="app.setView('weight')"><span>⚖️</span><div id="nav-weight">Vikt</div></button>
+      <button class="nav-item" onclick="app.setView('more')"><span>⋯</span><div id="nav-more">Mer</div></button>
     </div>
     
     <div id="toastContainer" class="toast-container"></div>
@@ -197,6 +198,7 @@
         helkropp:     { name: 'Helkropp',            desc: 'Hela kroppen varje pass – perfekt för nybörjare', icon: '💪', days: [2,3], defaultGoal: 'strength' },
         kroppsvikt:   { name: 'Kroppsvikt',          desc: 'Ingen utrustning – träna var som helst', icon: '🤸', days: [3,4,5], defaultGoal: 'hypertrophy' },
         pappakraft:   { name: 'Pappakraft 40+',       desc: 'Tunga basövningar – bibehåll muskler och testosteron', icon: '👨', days: [3,4], defaultGoal: 'strength' },
+        klimakterium: { name: 'Klimakterie & 40+',   desc: 'Styrka + benbelastning – vetenskapligt mot osteoporos', icon: '🌸', days: [2,3], defaultGoal: 'strength' },
         powerlifting: { name: 'Powerlifting',         desc: 'Squat, Bänkpress och Marklyft – maxstyrka', icon: '🦁', days: [3,4], defaultGoal: 'strength' },
         hiit:         { name: 'HIIT',                desc: 'Högintensiva intervaller – bränner fett snabbt', icon: '🔥', days: [3,4], defaultGoal: 'conditioning' },
         kondition:    { name: 'Kondition',            desc: 'Löpning, cykling och uthållighetsträning', icon: '🏃', days: [3,4,5], defaultGoal: 'conditioning' }
@@ -246,6 +248,12 @@
                days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] },
           5: { name: 'Kondition 5x/vecka', focus: 'Ambitiöst löpprogram',
                days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Lätt jogg', split:'Cardio_Easy' }, { day:'Onsdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] }
+        },
+        klimakterium: {
+          2: { name: 'Styrka & Skelett (2x/vecka)', focus: 'Tung belastning + hopp – bevisat bäst mot osteoporos och muskelmassaförlust',
+               days: [{ day: 'Tisdag', muscle: 'Underkropp & Rygg', split: 'Klima_A' }, { day: 'Fredag', muscle: 'Överkropp & Core', split: 'Klima_B' }] },
+          3: { name: 'Styrka & Balans (3x/vecka)', focus: 'Compound lifts + impact för benmassa + balans mot fallrisk',
+               days: [{ day: 'Måndag', muscle: 'Underkropp & Skelett', split: 'Klima_A' }, { day: 'Onsdag', muscle: 'Överkropp & Core', split: 'Klima_B' }, { day: 'Fredag', muscle: 'Helkropp & Balans', split: 'Klima_C' }] }
         },
         pappakraft: {
           3: { name: 'Pappakraft Tung (3x/vecka)', focus: 'Tunga basövningar 3–5 reps – maximal testosteron- och tillväxthormonstimulans',
@@ -500,6 +508,29 @@
           { name: 'Militärpress (Stående)', muscle: 'Axlar', type: 'Barbell', sets: 4, reps: '4-6', difficulty: 'Heavy' },
           { name: 'Chins / Pull-ups (Viktade)', muscle: 'Rygg', type: 'Bodyweight', sets: 4, reps: '4-6', difficulty: 'Heavy' },
           { name: 'Skivstångscurl', muscle: 'Biceps', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' }
+        ],
+
+        // ── Klimakterie 40+ – styrka + benbelastning + balans ──
+        Klima_A: [
+          { name: 'Knäböj (Skivstång)', muscle: 'Ben', type: 'Barbell', sets: 4, reps: '5-8', difficulty: 'Heavy' },
+          { name: 'Rumänsk Marklyft', muscle: 'Hamstrings', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Skivstångsrodd', muscle: 'Rygg', type: 'Barbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Stegövning / Box Step-up', muscle: 'Ben', type: 'Dumbbell', sets: 3, reps: '10 per ben', difficulty: 'Medium' },
+          { name: 'Plankan (Sida)', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '30s per sida', difficulty: 'Medium' }
+        ],
+        Klima_B: [
+          { name: 'Bänkpress (Hantlar)', muscle: 'Bröst', type: 'Dumbbell', sets: 3, reps: '8-10', difficulty: 'Medium' },
+          { name: 'Chins / Pull-ups (Assisterade ok)', muscle: 'Rygg', type: 'Bodyweight', sets: 3, reps: '5-8', difficulty: 'Medium' },
+          { name: 'Militärpress (Hantlar)', muscle: 'Axlar', type: 'Dumbbell', sets: 3, reps: '10-12', difficulty: 'Medium' },
+          { name: 'Hopprep (benbelastning)', muscle: 'Kondition', type: 'Cardio', sets: 3, reps: '2 min', difficulty: 'Medium' },
+          { name: 'Ryggresning / Superman', muscle: 'Rygg', type: 'Bodyweight', sets: 3, reps: '12-15', difficulty: 'Easy' }
+        ],
+        Klima_C: [
+          { name: 'Goblet Squat', muscle: 'Ben', type: 'Dumbbell', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Kettlebell Swing', muscle: 'Helkropp', type: 'Kettlebell', sets: 4, reps: '15', difficulty: 'Medium' },
+          { name: 'Enbensbalans (30s per ben)', muscle: 'Balans', type: 'Bodyweight', sets: 3, reps: '30s per ben', difficulty: 'Easy' },
+          { name: 'Axelpress (Maskin)', muscle: 'Axlar', type: 'Machine', sets: 3, reps: '12-15', difficulty: 'Easy' },
+          { name: 'Marklyft (Sumo Lätt)', muscle: 'Rygg', type: 'Barbell', sets: 3, reps: '10-12', difficulty: 'Medium' }
         ]
       },
 
@@ -818,10 +849,122 @@
       }
     };
 
+    // ===== ACHIEVEMENTS =====
+    const ACHIEVEMENTS = [
+      { id: 'first_workout',   icon: '🎯', check: s => s.workoutHistory.length >= 1 },
+      { id: 'workouts_10',     icon: '💪', check: s => s.workoutHistory.length >= 10 },
+      { id: 'workouts_50',     icon: '🏅', check: s => s.workoutHistory.length >= 50 },
+      { id: 'workouts_100',    icon: '🏆', check: s => s.workoutHistory.length >= 100 },
+      { id: 'streak_3',        icon: '🔥', check: s => s.longestStreak >= 3 },
+      { id: 'streak_7',        icon: '⚡', check: s => s.longestStreak >= 7 },
+      { id: 'streak_30',       icon: '🌟', check: s => s.longestStreak >= 30 },
+      { id: 'perfect_week',    icon: '⭐', check: s => (s.programs||[]).some(p => (p.weekHistory||[]).some(w => w.decision === 'progress' && w.sessions.length > 0 && w.sessions.every(x => x.passed))) },
+      { id: 'program_done',    icon: '🎖️', check: s => (s.programs||[]).some(p => p.currentWeek > p.weeks) },
+      { id: 'weight_down_5',   icon: '📉', check: s => s.weightLog.length >= 2 && s.weightLog[0].kg - s.weightLog[s.weightLog.length-1].kg >= 5 },
+      { id: 'weight_up_5',     icon: '📈', check: s => s.weightLog.length >= 2 && s.weightLog[s.weightLog.length-1].kg - s.weightLog[0].kg >= 5 }
+    ];
+
+    // ===== i18n =====
+    const LANG = {
+      sv: {
+        nav_workout:'Workout', nav_program:'Program', nav_history:'Historia', nav_more:'Mer',
+        settings:'Inställningar', your_name:'Ditt namn', save:'Spara', language:'Språk',
+        achievements_title:'Prestationer', achievements_none:'Inga prestationer upplåsta ännu. Fortsätt träna!',
+        weight_title:'Viktkurva', weight_log:'Logga vikt', weight_kg:'Vikt (kg)', weight_date:'Datum',
+        weight_empty:'Ingen vikt loggad ännu. Börja med en loggning ovan.',
+        weight_this_month:'Denna månad',
+        calendar_title:'Träningskalender', calendar_workouts:'pass denna månad',
+        history_title:'Träningshistoria', history_empty:'Ingen träning loggad ännu',
+        history_weekly:'Veckoöversikt', history_all:'Alla pass',
+        ach_first_workout:'Första steget', ach_first_workout_desc:'Slutförde ditt första träningspass',
+        ach_workouts_10:'10-klubben', ach_workouts_10_desc:'Slutförde 10 träningspass',
+        ach_workouts_50:'50-klubben', ach_workouts_50_desc:'Slutförde 50 träningspass',
+        ach_workouts_100:'100-klubben', ach_workouts_100_desc:'Slutförde 100 träningspass',
+        ach_streak_3:'3 dagars streak', ach_streak_3_desc:'Tre dagar i rad',
+        ach_streak_7:'En vecka i sträck', ach_streak_7_desc:'Sju dagar i rad',
+        ach_streak_30:'Månadslegend', ach_streak_30_desc:'30 dagars streak',
+        ach_perfect_week:'Perfekt vecka', ach_perfect_week_desc:'Alla pass godkända i en vecka',
+        ach_program_done:'Programfinisher', ach_program_done_desc:'Slutförde ett helt träningsprogram',
+        ach_weight_down_5:'Minus 5 kg', ach_weight_down_5_desc:'Gick ner 5 kg sedan start',
+        ach_weight_up_5:'Plus 5 kg', ach_weight_up_5_desc:'Gick upp 5 kg sedan start',
+        new_achievement:'Prestation upplåst',
+        privacy:'Integritetspolicy',
+        muscle_map:'Muskler idag', muscles_chest:'Bröst', muscles_back:'Rygg',
+        muscles_shoulders:'Axlar', muscles_biceps:'Biceps', muscles_triceps:'Triceps',
+        muscles_core:'Core', muscles_quads:'Quadriceps', muscles_hamstrings:'Hamstrings',
+        muscles_glutes:'Glutes', muscles_calves:'Vader',
+        today_workout:'Idag', days_streak:'dagars streak',
+        upgrade_title:'Gordito Premium', upgrade_once:'Engångsbetalning – äg appen för alltid',
+        upgrade_btn:'Köp Premium – 99 kr', upgrade_cancel:'Avbryt'
+      },
+      en: {
+        nav_workout:'Workout', nav_program:'Programs', nav_history:'History', nav_more:'More',
+        settings:'Settings', your_name:'Your name', save:'Save', language:'Language',
+        achievements_title:'Achievements', achievements_none:'No achievements unlocked yet. Keep training!',
+        weight_title:'Weight Chart', weight_log:'Log weight', weight_kg:'Weight (kg)', weight_date:'Date',
+        weight_empty:'No weight logged yet. Add your first entry above.',
+        weight_this_month:'This month',
+        calendar_title:'Workout Calendar', calendar_workouts:'workouts this month',
+        history_title:'Workout History', history_empty:'No workouts logged yet',
+        history_weekly:'Weekly overview', history_all:'All workouts',
+        ach_first_workout:'First Step', ach_first_workout_desc:'Completed your first workout',
+        ach_workouts_10:'10 Club', ach_workouts_10_desc:'Completed 10 workouts',
+        ach_workouts_50:'50 Club', ach_workouts_50_desc:'Completed 50 workouts',
+        ach_workouts_100:'100 Club', ach_workouts_100_desc:'Completed 100 workouts',
+        ach_streak_3:'3-Day Streak', ach_streak_3_desc:'Three days in a row',
+        ach_streak_7:'One Week Strong', ach_streak_7_desc:'Seven days in a row',
+        ach_streak_30:'Monthly Legend', ach_streak_30_desc:'30-day streak',
+        ach_perfect_week:'Perfect Week', ach_perfect_week_desc:'All sessions passed in one week',
+        ach_program_done:'Program Finisher', ach_program_done_desc:'Completed an entire training program',
+        ach_weight_down_5:'Down 5 kg', ach_weight_down_5_desc:'Lost 5 kg since start',
+        ach_weight_up_5:'Up 5 kg', ach_weight_up_5_desc:'Gained 5 kg since start',
+        new_achievement:'Achievement unlocked',
+        privacy:'Privacy Policy',
+        muscle_map:'Muscles today', muscles_chest:'Chest', muscles_back:'Back',
+        muscles_shoulders:'Shoulders', muscles_biceps:'Biceps', muscles_triceps:'Triceps',
+        muscles_core:'Core', muscles_quads:'Quads', muscles_hamstrings:'Hamstrings',
+        muscles_glutes:'Glutes', muscles_calves:'Calves',
+        today_workout:'Today', days_streak:'day streak',
+        upgrade_title:'Gordito Premium', upgrade_once:'One-time payment – own the app forever',
+        upgrade_btn:'Buy Premium – 99 kr', upgrade_cancel:'Cancel'
+      },
+      es: {
+        nav_workout:'Entrenamiento', nav_program:'Programas', nav_history:'Historial', nav_more:'Más',
+        settings:'Ajustes', your_name:'Tu nombre', save:'Guardar', language:'Idioma',
+        achievements_title:'Logros', achievements_none:'Aún no hay logros desbloqueados. ¡Sigue entrenando!',
+        weight_title:'Gráfico de Peso', weight_log:'Registrar peso', weight_kg:'Peso (kg)', weight_date:'Fecha',
+        weight_empty:'Aún no se ha registrado peso. Empieza con una entrada arriba.',
+        weight_this_month:'Este mes',
+        calendar_title:'Calendario de Entrenamiento', calendar_workouts:'entrenamientos este mes',
+        history_title:'Historial de Entrenamientos', history_empty:'Aún no hay entrenamientos registrados',
+        history_weekly:'Resumen semanal', history_all:'Todos los entrenamientos',
+        ach_first_workout:'Primer Paso', ach_first_workout_desc:'Completaste tu primer entrenamiento',
+        ach_workouts_10:'Club de 10', ach_workouts_10_desc:'Completaste 10 entrenamientos',
+        ach_workouts_50:'Club de 50', ach_workouts_50_desc:'Completaste 50 entrenamientos',
+        ach_workouts_100:'Club de 100', ach_workouts_100_desc:'Completaste 100 entrenamientos',
+        ach_streak_3:'Racha de 3 días', ach_streak_3_desc:'Tres días seguidos',
+        ach_streak_7:'Una semana seguida', ach_streak_7_desc:'Siete días seguidos',
+        ach_streak_30:'Leyenda mensual', ach_streak_30_desc:'Racha de 30 días',
+        ach_perfect_week:'Semana perfecta', ach_perfect_week_desc:'Todas las sesiones superadas en una semana',
+        ach_program_done:'Finalizador', ach_program_done_desc:'Completaste un programa de entrenamiento completo',
+        ach_weight_down_5:'Menos 5 kg', ach_weight_down_5_desc:'Perdiste 5 kg desde el inicio',
+        ach_weight_up_5:'Más 5 kg', ach_weight_up_5_desc:'Ganaste 5 kg desde el inicio',
+        new_achievement:'Logro desbloqueado',
+        privacy:'Política de Privacidad',
+        muscle_map:'Músculos hoy', muscles_chest:'Pecho', muscles_back:'Espalda',
+        muscles_shoulders:'Hombros', muscles_biceps:'Bíceps', muscles_triceps:'Tríceps',
+        muscles_core:'Core', muscles_quads:'Cuádriceps', muscles_hamstrings:'Isquiotibiales',
+        muscles_glutes:'Glúteos', muscles_calves:'Gemelos',
+        today_workout:'Hoy', days_streak:'días seguidos',
+        upgrade_title:'Gordito Premium', upgrade_once:'Pago único – posee la app para siempre',
+        upgrade_btn:'Comprar Premium – 99 kr', upgrade_cancel:'Cancelar'
+      }
+    };
+
     // ===== MAIN APP =====
     const app = {
-      CURRENT_VERSION: 4,
-      FREE_PROGRAM_TYPES: ['styrka', 'helkropp', 'kroppsvikt', 'pappakraft'],
+      CURRENT_VERSION: 5,
+      FREE_PROGRAM_TYPES: ['styrka', 'helkropp', 'kroppsvikt', 'pappakraft', 'klimakterium'],
 
       state: {
         _version: 1,
@@ -836,7 +979,10 @@
         currentStreak: 0,
         lastWorkoutDate: null,
         longestStreak: 0,
-        isPremium: false
+        isPremium: false,
+        weightLog: [],
+        achievements: [],
+        language: 'sv'
       },
 
       // ── Migration table ──────────────────────────────────────────
@@ -852,6 +998,12 @@
           lastWorkoutDate: s.lastWorkoutDate  || null,
           longestStreak:   s.longestStreak    || 0,
           isPremium:       s.isPremium        || false
+        }),
+        5: s => ({
+          ...s,
+          weightLog:    Array.isArray(s.weightLog)    ? s.weightLog    : [],
+          achievements: Array.isArray(s.achievements) ? s.achievements : [],
+          language:     s.language || 'sv'
         })
       },
 
@@ -886,6 +1038,9 @@
         if (typeof this.state.longestStreak !== 'number')   this.state.longestStreak = 0;
         if (typeof this.state.notificationsEnabled !== 'boolean') this.state.notificationsEnabled = false;
         if (!this.state.notificationTime) this.state.notificationTime = '08:00';
+        if (!Array.isArray(this.state.weightLog))    this.state.weightLog    = [];
+        if (!Array.isArray(this.state.achievements)) this.state.achievements = [];
+        if (!this.state.language) this.state.language = 'sv';
         this.state._version = this.CURRENT_VERSION;
 
         // Migrate old localStorage API caches → IDB on first run, then remove them
@@ -982,6 +1137,7 @@
             case 'createProgram':   html = this.renderCreateProgram(); break;
             case 'editProgram':     html = this.renderEditProgram(); break;
             case 'history':         html = this.renderHistory(); break;
+            case 'weight':          html = this.renderWeightLog(); break;
             case 'workout':         html = this.renderWorkout(); break;
             case 'sessionResult':   html = this.renderSessionResult(); break;
             case 'programComplete': html = this.renderProgramComplete(); break;
@@ -1015,11 +1171,16 @@
 
       updateNav() {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        const views = ['dashboard', 'programs', 'history', 'more'];
+        const views = ['dashboard', 'programs', 'history', 'weight', 'more'];
         const idx = views.indexOf(this.state.currentView);
-        if (idx >= 0) {
-          document.querySelectorAll('.nav-item')[idx].classList.add('active');
-        }
+        if (idx >= 0) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+        // Update i18n labels
+        const labels = {
+          'nav-workout': this.t('nav_workout'), 'nav-program': this.t('nav_program'),
+          'nav-history': this.t('nav_history'), 'nav-more': this.t('nav_more'),
+          'nav-weight': this.state.language === 'en' ? 'Weight' : this.state.language === 'es' ? 'Peso' : 'Vikt'
+        };
+        Object.entries(labels).forEach(([id, text]) => { const el = document.getElementById(id); if (el) el.textContent = text; });
       },
 
       // ===== ONBOARDING =====
@@ -1364,13 +1525,17 @@
         const sessionInWeek = prog ? prog.currentDayInWeek : 0;
         const daysPerWeek = prog ? prog.daysPerWeek : 1;
 
+        const scheduleDay = prog ? prog.schedule[wo.dayIdx] : null;
+        const split = scheduleDay ? scheduleDay.split : 'Push';
+
         let html = '<button class="btn-secondary" onclick="app.cancelWorkout()">← Avbryt</button>';
         html += '<h2>' + wo.day + ' – ' + wo.muscle + '</h2>';
-        html += '<div style="background:#1e293b;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">';
+        html += '<div style="background:#1e293b;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;">';
         html += '<span style="color:var(--text-muted);font-size:0.85rem;">Vecka ' + weekNum + ' · Pass ' + (sessionInWeek + 1) + '/' + daysPerWeek + '</span>';
         const goalLabels = { strength: '💪 Styrka', hypertrophy: '🏋️ Hypertrofi', conditioning: '🏃 Kondition' };
         html += '<span style="color:var(--primary);font-size:0.8rem;font-weight:700;">' + (goalLabels[goal] || goal) + '</span>';
         html += '</div>';
+        html += this.renderMuscleMap(split);
 
         wo.exercises.forEach((ex, idx) => {
           const doneSets = ex.completed.length;
@@ -1514,7 +1679,8 @@
 
       // ===== HISTORY =====
       renderHistory() {
-        let html = '<h2>Träningshistoria</h2>';
+        let html = '<h2>' + this.t('history_title') + '</h2>';
+        html += this.renderCalendar();
 
         const activeProgram = this.state.programs.find(p => p.active) || this.state.programs[0];
 
@@ -1575,6 +1741,164 @@
         return html;
       },
 
+      // ===== CALENDAR =====
+      renderCalendar() {
+        const now = new Date(), year = now.getFullYear(), month = now.getMonth();
+        const dates = new Set(this.state.workoutHistory.filter(wo => { const d=new Date(wo.date); return d.getFullYear()===year&&d.getMonth()===month; }).map(wo => new Date(wo.date).toISOString().slice(0,10)));
+        const firstDay = new Date(year,month,1).getDay();
+        const days = new Date(year,month+1,0).getDate();
+        const today = now.toISOString().slice(0,10);
+        const months_sv = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+        const monthName = months_sv[month] + ' ' + year;
+        let html = '<div class="card" style="padding:1rem;">';
+        html += '<h4 style="text-align:center;margin:0 0 0.75rem;text-transform:capitalize;">' + monthName + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;">';
+        ['M','T','O','T','F','L','S'].forEach(d => { html += '<div style="font-size:0.6rem;color:var(--text-muted);padding-bottom:0.3rem;">' + d + '</div>'; });
+        const offset = (firstDay === 0 ? 6 : firstDay - 1);
+        for (let i=0;i<offset;i++) html += '<div></div>';
+        for (let d=1;d<=days;d++) {
+          const ds = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+          const worked = dates.has(ds), isToday = ds===today;
+          let bg = worked ? 'background:var(--primary);color:#fff;font-weight:700;' : isToday ? 'border:2px solid var(--primary);color:var(--primary);font-weight:700;' : 'color:var(--text-muted);';
+          html += '<div style="padding:1px;"><div style="border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;margin:auto;font-size:0.72rem;' + bg + '">' + d + '</div></div>';
+        }
+        html += '</div>';
+        html += '<div style="text-align:center;margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);">' + dates.size + ' ' + this.t('calendar_workouts') + '</div>';
+        html += '</div>';
+        return html;
+      },
+
+      // ===== MUSCLE MAP =====
+      renderMuscleMap(split) {
+        const map = {
+          Push:       ['chest','triceps','shoulders'],
+          Pull:       ['back','biceps'],
+          Legs:       ['quads','hamstrings','glutes','calves'],
+          BW_Core:    ['core'],
+          Upper:      ['chest','back','shoulders','biceps','triceps'],
+          Lower:      ['quads','hamstrings','glutes','calves'],
+          Pappa_A:    ['quads','chest','back','shoulders'],
+          Pappa_B:    ['back','hamstrings','chest','biceps'],
+          Pappa_C:    ['quads','shoulders','triceps','core'],
+          Pappa_Legs: ['quads','hamstrings','glutes','calves'],
+          Pappa_Upper:['chest','back','shoulders','biceps'],
+          Klima_A:    ['quads','hamstrings','back'],
+          Klima_B:    ['chest','back','shoulders'],
+          Klima_C:    ['quads','core','shoulders'],
+          HIIT_Lower: ['quads','hamstrings','calves'],
+          HIIT_Upper: ['chest','shoulders','back'],
+          HIIT_Full:  ['chest','back','quads','core'],
+          HIIT_Core:  ['core'],
+          Cardio_Interval:['quads','calves'], Cardio_Tempo:['quads','calves'],
+          Cardio_Long:['quads','calves'], Cardio_Easy:['quads','calves'], Cardio_Strength:['quads','core']
+        };
+        const active = new Set(map[split] || []);
+        const groups = [
+          {id:'chest',    label:this.t('muscles_chest'),     emoji:'🫁'},
+          {id:'back',     label:this.t('muscles_back'),      emoji:'💪'},
+          {id:'shoulders',label:this.t('muscles_shoulders'), emoji:'🏋️'},
+          {id:'biceps',   label:this.t('muscles_biceps'),    emoji:'💪'},
+          {id:'triceps',  label:this.t('muscles_triceps'),   emoji:'💪'},
+          {id:'core',     label:this.t('muscles_core'),      emoji:'🎯'},
+          {id:'quads',    label:this.t('muscles_quads'),     emoji:'🦵'},
+          {id:'hamstrings',label:this.t('muscles_hamstrings'),emoji:'🦵'},
+          {id:'glutes',   label:this.t('muscles_glutes'),    emoji:'🍑'},
+          {id:'calves',   label:this.t('muscles_calves'),    emoji:'🦵'}
+        ];
+        let html = '<div style="margin:0.75rem 0;">';
+        html += '<div style="font-size:0.8rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">' + this.t('muscle_map') + '</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:0.35rem;">';
+        groups.forEach(g => {
+          const on = active.has(g.id);
+          html += '<span style="padding:0.25rem 0.6rem;border-radius:2rem;font-size:0.75rem;font-weight:600;' + (on ? 'background:rgba(16,185,129,0.2);color:var(--primary);border:1px solid var(--primary);' : 'background:#1e293b;color:#475569;border:1px solid #2d3748;') + '">' + (on ? '●' : '○') + ' ' + g.label + '</span>';
+        });
+        html += '</div></div>';
+        return html;
+      },
+
+      // ===== WEIGHT LOG VIEW =====
+      renderWeightLog() {
+        const log = this.state.weightLog;
+        let html = '<h2>' + this.t('weight_title') + '</h2>';
+
+        // Input form
+        const today = new Date().toISOString().slice(0,10);
+        html += '<div class="card">';
+        html += '<h4 style="margin:0 0 0.75rem;">' + this.t('weight_log') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">';
+        html += '<div><label style="margin:0 0 0.25rem;">' + this.t('weight_kg') + '</label><input type="number" id="weightKg" min="20" max="300" step="0.1" placeholder="75.5" style="margin:0;"></div>';
+        html += '<div><label style="margin:0 0 0.25rem;">' + this.t('weight_date') + '</label><input type="date" id="weightDate" value="' + today + '" style="margin:0;"></div>';
+        html += '</div>';
+        html += '<button onclick="app.logWeight()" class="btn-primary" style="margin:0.75rem 0 0;">' + this.t('weight_log') + '</button>';
+        html += '</div>';
+
+        if (log.length === 0) {
+          html += '<p class="text-muted" style="text-align:center;padding:1rem;">' + this.t('weight_empty') + '</p>';
+          return html;
+        }
+
+        // SVG line chart (last 30 entries)
+        const recent = log.slice(-30);
+        const vals = recent.map(e => e.kg);
+        const minKg = Math.min(...vals) - 1, maxKg = Math.max(...vals) + 1;
+        const W = 300, H = 100, pad = 8;
+        const cx = (i) => pad + (i / (recent.length-1 || 1)) * (W - 2*pad);
+        const cy = (kg) => H - pad - ((kg - minKg) / (maxKg - minKg || 1)) * (H - 2*pad);
+        const pts = recent.map((e,i) => cx(i)+','+cy(e.kg)).join(' ');
+        const first = recent[0].kg, last = recent[recent.length-1].kg;
+        const diff = (last - first).toFixed(1);
+        const diffColor = diff > 0 ? 'var(--accent)' : diff < 0 ? 'var(--primary)' : 'var(--text-muted)';
+
+        html += '<div class="card">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">';
+        html += '<div><div style="font-size:1.5rem;font-weight:800;color:var(--primary);">' + last + ' <span style="font-size:0.9rem;">kg</span></div>';
+        html += '<div style="font-size:0.78rem;color:var(--text-muted);">' + recent[recent.length-1].date + '</div></div>';
+        html += '<div style="text-align:right;"><div style="font-size:1.2rem;font-weight:700;color:' + diffColor + ';">' + (diff > 0 ? '+' : '') + diff + ' kg</div>';
+        html += '<div style="font-size:0.72rem;color:var(--text-muted);">sedan start</div></div>';
+        html += '</div>';
+        html += '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;overflow:visible;">';
+        html += '<polyline points="' + pts + '" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round"/>';
+        recent.forEach((e,i) => html += '<circle cx="' + cx(i) + '" cy="' + cy(e.kg) + '" r="3" fill="var(--primary)"/>');
+        html += '<text x="' + pad + '" y="' + (H-1) + '" fill="var(--text-muted)" font-size="7">' + minKg.toFixed(1) + '</text>';
+        html += '<text x="' + pad + '" y="' + (pad+5) + '" fill="var(--text-muted)" font-size="7">' + maxKg.toFixed(1) + '</text>';
+        html += '</svg></div>';
+
+        // Log table (last 10)
+        html += '<h3>' + this.t('history_all') + '</h3>';
+        [...log].reverse().slice(0,15).forEach((e,i) => {
+          const realIdx = log.length - 1 - i;
+          html += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1rem;margin:0.4rem 0;">';
+          html += '<div style="font-size:0.85rem;color:var(--text-muted);">' + e.date + '</div>';
+          html += '<div style="font-weight:700;font-size:1.1rem;">' + e.kg + ' kg</div>';
+          html += '<button onclick="app.deleteWeight(' + realIdx + ')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:0.25rem;">🗑</button>';
+          html += '</div>';
+        });
+        return html;
+      },
+
+      // ===== ACHIEVEMENTS SECTION =====
+      renderAchievementsSection() {
+        let html = '<div class="card">';
+        html += '<h4 style="margin:0 0 0.75rem;">' + this.t('achievements_title') + '</h4>';
+        const unlocked = this.state.achievements;
+        if (unlocked.length === 0) {
+          html += '<p class="text-muted" style="font-size:0.85rem;">' + this.t('achievements_none') + '</p>';
+        } else {
+          html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">';
+          ACHIEVEMENTS.forEach(a => {
+            const on = unlocked.includes(a.id);
+            html += '<div style="background:#0f1419;border-radius:0.5rem;padding:0.6rem;opacity:' + (on?'1':'0.35') + ';">';
+            html += '<div style="font-size:1.4rem;">' + a.icon + '</div>';
+            html += '<div style="font-size:0.75rem;font-weight:700;color:' + (on?'#fff':'var(--text-muted)') + ';margin-top:0.2rem;">' + this.t('ach_'+a.id) + '</div>';
+            html += '<div style="font-size:0.65rem;color:var(--text-muted);">' + this.t('ach_'+a.id+'_desc') + '</div>';
+            html += '</div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+        return html;
+      },
+
       // ===== FREEMIUM =====
       renderUpgradeModal(reason) {
         const reasons = {
@@ -1597,10 +1921,10 @@
           '<div style="font-size:0.85rem;margin-bottom:0.4rem;">✅ Obegränsat egna övningar</div>' +
           '<div style="font-size:0.85rem;">✅ Prioriterad support</div>' +
           '</div>' +
-          '<div style="font-size:1.5rem;font-weight:800;color:var(--primary);margin-bottom:0.25rem;">49 kr</div>' +
-          '<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">Engångsbetalning – äg appen för alltid</div>' +
-          '<a href="mailto:gordito@radiobaron.se?subject=Köp Premium" style="display:block;background:linear-gradient(135deg,var(--primary),#059669);color:#fff;font-weight:700;padding:0.9rem;border-radius:0.75rem;text-decoration:none;margin-bottom:0.75rem;">🚀 Köp Premium – 49 kr</a>' +
-          '<button onclick="document.querySelector(\'.modal-overlay\').remove()" class="btn-secondary" style="width:100%;margin:0;">Avbryt</button>' +
+          '<div style="font-size:1.5rem;font-weight:800;color:var(--primary);margin-bottom:0.25rem;">99 kr</div>' +
+          '<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">' + this.t('upgrade_once') + '</div>' +
+          '<a href="mailto:gordito@radiobaron.se?subject=Köp Premium" style="display:block;background:linear-gradient(135deg,var(--primary),#059669);color:#fff;font-weight:700;padding:0.9rem;border-radius:0.75rem;text-decoration:none;margin-bottom:0.75rem;">🚀 ' + this.t('upgrade_btn') + '</a>' +
+          '<button onclick="document.querySelector(\'.modal-overlay\').remove()" class="btn-secondary" style="width:100%;margin:0;">' + this.t('upgrade_cancel') + '</button>' +
           '</div>';
         document.getElementById('app').appendChild(overlay);
         overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
@@ -1719,6 +2043,20 @@
           html += '<a href="mailto:gordito@radiobaron.se?subject=Köp Premium" style="display:block;background:linear-gradient(135deg,var(--primary),#059669);color:#fff;font-weight:700;padding:0.85rem;border-radius:0.75rem;text-decoration:none;text-align:center;">🚀 Köp Premium – 49 kr</a>';
           html += '</div>';
         }
+
+        // Achievements
+        html += this.renderAchievementsSection();
+
+        // Language picker
+        html += '<div class="card">';
+        html += '<h4 style="margin:0 0 0.75rem;">🌍 ' + this.t('language') + '</h4>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;">';
+        ['sv','en','es'].forEach(lang => {
+          const labels = {sv:'🇸🇪 Svenska', en:'🇬🇧 English', es:'🇪🇸 Español'};
+          const active = this.state.language === lang;
+          html += '<button onclick="app.changeLanguage(\'' + lang + '\')" style="padding:0.6rem;border-radius:0.5rem;border:2px solid ' + (active?'var(--primary)':'#334155') + ';background:' + (active?'rgba(16,185,129,0.15)':'#334155') + ';color:' + (active?'var(--primary)':'#fff') + ';font-size:0.78rem;font-weight:700;cursor:pointer;">' + labels[lang] + '</button>';
+        });
+        html += '</div></div>';
 
         html += '<div class="card">';
         html += '<h4 style="margin:0 0 0.5rem;">Om appen</h4>';
@@ -1973,6 +2311,87 @@
         this.render();
       },
 
+      // ===== i18n =====
+      t(key) {
+        const lang = this.state.language || 'sv';
+        return (LANG[lang] && LANG[lang][key]) || LANG.sv[key] || key;
+      },
+
+      changeLanguage(lang) {
+        if (!LANG[lang]) return;
+        this.state.language = lang;
+        this.save();
+        this.render();
+      },
+
+      // ===== ACHIEVEMENTS =====
+      checkAchievements() {
+        const newOnes = [];
+        for (const ach of ACHIEVEMENTS) {
+          if (!this.state.achievements.includes(ach.id)) {
+            try { if (ach.check(this.state)) { this.state.achievements.push(ach.id); newOnes.push(ach); } }
+            catch(e) {}
+          }
+        }
+        if (newOnes.length > 0) {
+          this.save();
+          newOnes.forEach((a, i) => setTimeout(() => this.showToast(a.icon + ' ' + this.t('new_achievement') + ': ' + this.t('ach_' + a.id), 'success'), 1500 + i * 800));
+        }
+      },
+
+      // ===== CONFETTI =====
+      showConfetti() {
+        const canvas = document.createElement('canvas');
+        canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:900;width:100%;height:100%;';
+        document.getElementById('app').appendChild(canvas);
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        const colors = ['#10b981','#f97316','#8b5cf6','#fbbf24','#60a5fa','#f43f5e'];
+        const pieces = Array.from({length:60}, () => ({
+          x: Math.random() * canvas.width, y: -10 - Math.random() * 80,
+          w: 7 + Math.random() * 7, h: 9 + Math.random() * 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random()-0.5)*4, vy: 2+Math.random()*3,
+          angle: Math.random()*Math.PI*2, spin: (Math.random()-0.5)*0.15
+        }));
+        let frames = 0;
+        const draw = () => {
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          pieces.forEach(p => {
+            p.x+=p.vx; p.y+=p.vy; p.angle+=p.spin; p.vy+=0.06;
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle);
+            ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+            ctx.restore();
+          });
+          if (++frames < 130) requestAnimationFrame(draw); else canvas.remove();
+        };
+        draw();
+      },
+
+      // ===== WEIGHT LOG =====
+      logWeight() {
+        const kgInput = document.getElementById('weightKg');
+        const dateInput = document.getElementById('weightDate');
+        if (!kgInput) return;
+        const kg = parseFloat(kgInput.value);
+        if (isNaN(kg) || kg < 20 || kg > 300) { this.showToast('Ange en giltig vikt (20–300 kg)', 'error'); return; }
+        const date = (dateInput && dateInput.value) || new Date().toISOString().slice(0,10);
+        // Replace entry for same date if exists
+        const existing = this.state.weightLog.findIndex(e => e.date === date);
+        if (existing >= 0) this.state.weightLog[existing].kg = kg;
+        else this.state.weightLog.push({date, kg});
+        this.state.weightLog.sort((a,b) => a.date.localeCompare(b.date));
+        this.save();
+        this.checkAchievements();
+        this.showToast('✅ ' + kg + ' kg sparad', 'success');
+        this.render();
+      },
+
+      deleteWeight(idx) {
+        this.state.weightLog.splice(idx, 1);
+        this.save(); this.render();
+      },
+
       // ===== NOTIFICATIONS =====
       async requestNotifications() {
         if (!('Notification' in window)) {
@@ -2084,7 +2503,9 @@
         };
 
         this.updateStreak();
+        this.checkAchievements();
         this.save();
+        if (passed) this.showConfetti();
         this.setView('sessionResult');
       },
 

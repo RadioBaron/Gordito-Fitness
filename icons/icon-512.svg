@@ -1,40 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Background -->
-  <rect width="512" height="512" rx="100" fill="#0f1419"/>
-  <!-- Green circle backdrop -->
-  <circle cx="256" cy="256" r="210" fill="#10b981" opacity="0.12"/>
-
-  <!-- Left dumbbell weights -->
-  <rect x="28" y="158" width="38" height="76" rx="16" fill="#f97316"/>
-  <rect x="66" y="158" width="38" height="76" rx="16" fill="#f97316"/>
-  <rect x="38" y="172" width="64" height="44" rx="10" fill="#f59e0b"/>
-  <!-- Right dumbbell weights -->
-  <rect x="406" y="158" width="38" height="76" rx="16" fill="#f97316"/>
-  <rect x="444" y="158" width="38" height="76" rx="16" fill="#f97316"/>
-  <rect x="406" y="172" width="64" height="44" rx="10" fill="#f59e0b"/>
-
-  <!-- Left arm -->
-  <line x1="104" y1="196" x2="168" y2="278" stroke="#059669" stroke-width="48" stroke-linecap="round"/>
-  <!-- Right arm -->
-  <line x1="408" y1="196" x2="344" y2="278" stroke="#059669" stroke-width="48" stroke-linecap="round"/>
-
-  <!-- Body (big belly) -->
-  <ellipse cx="256" cy="364" rx="140" ry="134" fill="#10b981"/>
-  <!-- Head -->
-  <circle cx="256" cy="200" r="86" fill="#10b981"/>
-  <!-- Sweatband -->
-  <path d="M174 176 Q256 142 338 176" stroke="#f97316" stroke-width="26" stroke-linecap="round" fill="none"/>
-  <!-- Eyes -->
-  <circle cx="222" cy="192" r="16" fill="white"/>
-  <circle cx="290" cy="192" r="16" fill="white"/>
-  <circle cx="226" cy="196" r="8" fill="#0f1419"/>
-  <circle cx="294" cy="196" r="8" fill="#0f1419"/>
-  <!-- Grin -->
-  <path d="M216 226 Q256 268 296 226" stroke="white" stroke-width="13" stroke-linecap="round" fill="none"/>
-  <!-- Sweat drop -->
-  <ellipse cx="338" cy="152" rx="13" ry="19" fill="#60a5fa" opacity="0.8"/>
-
-  <!-- Legs -->
-  <line x1="210" y1="476" x2="178" y2="512" stroke="#059669" stroke-width="44" stroke-linecap="round"/>
-  <line x1="302" y1="476" x2="334" y2="512" stroke="#059669" stroke-width="44" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="36" fill="#0f1419"/>
+  <rect x="8" y="58" width="14" height="28" rx="6" fill="#f97316"/>
+  <rect x="22" y="58" width="14" height="28" rx="6" fill="#f97316"/>
+  <rect x="10" y="65" width="24" height="14" rx="4" fill="#f59e0b"/>
+  <rect x="170" y="58" width="14" height="28" rx="6" fill="#f97316"/>
+  <rect x="156" y="58" width="14" height="28" rx="6" fill="#f97316"/>
+  <rect x="158" y="65" width="24" height="14" rx="4" fill="#f59e0b"/>
+  <line x1="36" y1="72" x2="62" y2="106" stroke="#059669" stroke-width="16" stroke-linecap="round"/>
+  <line x1="156" y1="72" x2="130" y2="106" stroke="#059669" stroke-width="16" stroke-linecap="round"/>
+  <ellipse cx="96" cy="138" rx="46" ry="44" fill="#10b981"/>
+  <circle cx="96" cy="80" r="30" fill="#10b981"/>
+  <path d="M68 70 Q96 58 124 70" stroke="#f97316" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <circle cx="84" cy="78" r="5" fill="white"/>
+  <circle cx="108" cy="78" r="5" fill="white"/>
+  <circle cx="86" cy="80" r="2.5" fill="#0f1419"/>
+  <circle cx="110" cy="80" r="2.5" fill="#0f1419"/>
+  <path d="M82 90 Q96 102 110 90" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <ellipse cx="130" cy="62" rx="4" ry="6" fill="#60a5fa" opacity="0.8"/>
+  <line x1="80" y1="178" x2="68" y2="192" stroke="#059669" stroke-width="14" stroke-linecap="round"/>
+  <line x1="112" y1="178" x2="124" y2="192" stroke="#059669" stroke-width="14" stroke-linecap="round"/>
 </svg>

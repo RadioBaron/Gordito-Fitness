@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(copy \"familyfit-v6-api-integrated.html\" \"Gordito-Fitness.html\")",
-      "Bash(dir *.html)"
+      "Bash(dir *.html)",
+      "PowerShell(cd \"C:\\\\Users\\\\Walter\\\\Desktop\\\\Träningsapp\"; \\(Get-Item index.html\\).Length)",
+      "mcp__Claude_Preview__preview_start",
+      "Skill(schedule)",
+      "Skill(schedule:*)"
     ]
   }
 }
