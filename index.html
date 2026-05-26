@@ -909,6 +909,8 @@
         }
         // Route new users to onboarding
         if (!this.state.onboardingDone) this.state.currentView = 'onboarding';
+        // Resume in-progress workout if user had one when they left the app
+        if (this.state.currentWorkout) this.state.currentView = 'workout';
         this.render();
         this._apiReady = false;
         WorkoutLibrary.loadAPIExercises().catch(() => {}).finally(() => { this._apiReady = true; });
@@ -916,6 +918,16 @@
         if (this.state.notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
           this.scheduleNotification();
         }
+
+        // ── CRITICAL: save workout state the moment user leaves the app ──
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && this.state.currentWorkout) {
+            this.save();
+          }
+        });
+        window.addEventListener('pagehide', () => {
+          if (this.state.currentWorkout) this.save();
+        });
       },
 
       // Escapes user input before injecting into HTML to prevent layout breaks
@@ -1937,6 +1949,9 @@
             prog.schedule[dayIdx].exercises[exIdx].weight = ex.weight;
           }
         }
+        // Debounced save so every keystroke doesn't hammer localStorage
+        clearTimeout(this._weightSaveTimer);
+        this._weightSaveTimer = setTimeout(() => this.save(), 800);
       },
 
       logSet(exIdx, setNum) {
@@ -1947,12 +1962,14 @@
           ex.completed.push(setNum);
           this.startRestTimer(90);
         }
+        this.save(); // persist progress in case user switches app
         this.render();
       },
 
       completeExercise(exIdx) {
         const ex = this.state.currentWorkout.exercises[exIdx];
         ex.completed = Array.from({ length: ex.sets }, (_, i) => i + 1);
+        this.save(); // persist progress in case user switches app
         this.render();
       },
 
@@ -2205,6 +2222,7 @@
         if (!alts.length) { this.showToast('Inga alternativ tillgängliga', 'warning'); return; }
         const picked = alts[Math.floor(Math.random() * alts.length)];
         wo.exercises[exIdx] = { ...picked, completed: [], weight: '' };
+        this.save(); // persist in case user switches app
         this.render();
         this.showToast('Bytte till ' + picked.name + ' 🔄', 'success');
       },
