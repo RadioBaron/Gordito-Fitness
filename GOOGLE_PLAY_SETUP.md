@@ -123,8 +123,11 @@ Installerar APK:n på en ansluten Android-enhet. Öppna appen och verifiera att:
 
 ## Monetisering (nästa steg)
 
-När appen är publicerad, integrera [RevenueCat](https://www.revenuecat.com) för:
-- Google Play Billing
-- In-app purchases (Premium-prenumeration 49 kr/mån)
-- Receipt validation
-- Cross-platform (iOS/Android)
+Appen använder en **engångsprismodell** – köper du appen får du allt, inga prenumerationer.
+
+Alternativ för att hantera köpet:
+- **Google Play In-app Products** (one-time purchase) – välj "Managed product" (inte subscription) i Play Console
+- **Alternativ:** Direkt betalning via Stripe/Swish, sedan manuell aktivering av `isPremium: true` i appen
+- **Enklaste lösningen nu:** E-post till gordito@radiobaron.se → betalning via Swish → du sätter `isPremium = true` via supportkod
+
+Pris: **49 kr engång** – full tillgång för alltid.
