@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Gordito">
   <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Gordito Fitness</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <style>
@@ -1196,6 +1197,23 @@
         });
         window.addEventListener('pagehide', () => {
           if (this.state.currentWorkout) this.save();
+        });
+
+        // Android TWA: handle hardware back-button
+        // Push a history entry so back-button navigates inside app instead of closing it
+        history.pushState({ gordito: true }, '');
+        window.addEventListener('popstate', () => {
+          // Push a new entry immediately so back always has somewhere to go
+          history.pushState({ gordito: true }, '');
+          // Navigate within app
+          if (this.state.currentView === 'workout') {
+            if (confirm('Avbryta träningspasset?')) {
+              this.state.currentWorkout = null;
+              this.setView('dashboard');
+            }
+          } else if (this.state.currentView !== 'dashboard') {
+            this.setView('dashboard');
+          }
         });
       },
 
@@ -2598,7 +2616,7 @@
         const name = this.state.userName || 'Tränaren';
         const title = 'Dags att träna! 💪';
         const body = name + ', idag är det ' + (nextDay.muscle || nextDay.day) + '. Kör hårt!';
-        const opts = { body, icon: '/icons/icon-192.svg', badge: '/icons/icon-192.svg', tag: 'workout-reminder', vibrate: [200, 100, 200] };
+        const opts = { body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', tag: 'workout-reminder', vibrate: [200, 100, 200] };
         if (navigator.serviceWorker && navigator.serviceWorker.controller) {
           navigator.serviceWorker.ready.then(reg => reg.showNotification(title, opts)).catch(() => {});
         } else if ('Notification' in window) {
