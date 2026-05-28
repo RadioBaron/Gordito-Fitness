@@ -199,6 +199,11 @@
         kroppsvikt:   { name: 'Kroppsvikt',          desc: 'Ingen utrustning – träna var som helst', icon: '🤸', days: [3,4,5], defaultGoal: 'hypertrophy' },
         pappakraft:   { name: 'Pappakraft 40+',       desc: 'Tunga basövningar – bibehåll muskler och testosteron', icon: '👨', days: [3,4], defaultGoal: 'strength' },
         klimakterium: { name: 'Klimakterie & 40+',   desc: 'Styrka + benbelastning – vetenskapligt mot osteoporos', icon: '🌸', days: [2,3], defaultGoal: 'strength' },
+        prehab:       { name: 'Prehab – Skadefö­rebyggande', desc: 'Stärk svaga länkar innan de brister – knä, axel & rygg', icon: '🛡️', days: [3], defaultGoal: 'rehab', premium: true },
+        rehab_rygg:   { name: 'Rehab – Ländrygg',  desc: 'Evidensbaserad rehabilitering av ländryggsbesvär', icon: '🦴', days: [3,4], defaultGoal: 'rehab', premium: true },
+        rehab_kna:    { name: 'Rehab – Knä',        desc: 'Rehabilitering efter knäskada eller -operation', icon: '🦵', days: [3,4], defaultGoal: 'rehab', premium: true },
+        rehab_axel:   { name: 'Rehab – Axel',       desc: 'Rotatorkuff, impingement och axelstabilitet', icon: '💆', days: [3,4], defaultGoal: 'rehab', premium: true },
+        rehab_nacke:  { name: 'Rehab – Nacke',      desc: 'Nackspärr, spänningar och cervikal rehabilitering', icon: '🧠', days: [3], defaultGoal: 'rehab', premium: true },
         powerlifting: { name: 'Powerlifting',         desc: 'Squat, Bänkpress och Marklyft – maxstyrka', icon: '🦁', days: [3,4], defaultGoal: 'strength' },
         hiit:         { name: 'HIIT',                desc: 'Högintensiva intervaller – bränner fett snabbt', icon: '🔥', days: [3,4], defaultGoal: 'conditioning' },
         kondition:    { name: 'Kondition',            desc: 'Löpning, cykling och uthållighetsträning', icon: '🏃', days: [3,4,5], defaultGoal: 'conditioning' }
@@ -248,6 +253,32 @@
                days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] },
           5: { name: 'Kondition 5x/vecka', focus: 'Ambitiöst löpprogram',
                days: [{ day:'Måndag', muscle:'Intervaller', split:'Cardio_Interval' }, { day:'Tisdag', muscle:'Lätt jogg', split:'Cardio_Easy' }, { day:'Onsdag', muscle:'Tempolopp', split:'Cardio_Tempo' }, { day:'Torsdag', muscle:'Styrkekondition', split:'Cardio_Strength' }, { day:'Lördag', muscle:'Distanslopp', split:'Cardio_Long' }] }
+        },
+        prehab: {
+          3: { name: 'Prehab Helkropp (3x/vecka)', focus: 'Knä, axel och rygg – roterande förebyggande träning för aktiva 40+',
+               days: [{ day: 'Måndag', muscle: 'Knä & Höft', split: 'Prehab_Kna' }, { day: 'Onsdag', muscle: 'Axel & Överkropp', split: 'Prehab_Axel' }, { day: 'Fredag', muscle: 'Rygg & Core', split: 'Prehab_Rygg' }] }
+        },
+        rehab_rygg: {
+          3: { name: 'Ryggrehabilitering (3x/vecka)', focus: 'McGill Big 3 + mobilitet + progressiv belastning – fas 1-2',
+               days: [{ day: 'Måndag', muscle: 'Stabilitet & Rörlighet', split: 'Rehab_Rygg_A' }, { day: 'Onsdag', muscle: 'Styrka & Mobilitet', split: 'Rehab_Rygg_B' }, { day: 'Fredag', muscle: 'Stabilitet & Styrka', split: 'Rehab_Rygg_A' }] },
+          4: { name: 'Ryggrehabilitering (4x/vecka)', focus: 'Daglig rörlighet + alternerade styrkedagar',
+               days: [{ day: 'Måndag', muscle: 'Stabilitet & Rörlighet', split: 'Rehab_Rygg_A' }, { day: 'Tisdag', muscle: 'Styrka & Mobilitet', split: 'Rehab_Rygg_B' }, { day: 'Torsdag', muscle: 'Stabilitet & Rörlighet', split: 'Rehab_Rygg_A' }, { day: 'Fredag', muscle: 'Styrka & Mobilitet', split: 'Rehab_Rygg_B' }] }
+        },
+        rehab_kna: {
+          3: { name: 'Knärehabilitering (3x/vecka)', focus: 'Quad-aktivering, proprioception och gradvis belastning',
+               days: [{ day: 'Måndag', muscle: 'Aktivering & Rörlighet', split: 'Rehab_Kna_A' }, { day: 'Onsdag', muscle: 'Styrka & Balans', split: 'Rehab_Kna_B' }, { day: 'Fredag', muscle: 'Aktivering & Rörlighet', split: 'Rehab_Kna_A' }] },
+          4: { name: 'Knärehabilitering (4x/vecka)', focus: 'Tätare träning för snabbare återhämtning',
+               days: [{ day: 'Måndag', muscle: 'Aktivering & Rörlighet', split: 'Rehab_Kna_A' }, { day: 'Tisdag', muscle: 'Styrka & Balans', split: 'Rehab_Kna_B' }, { day: 'Torsdag', muscle: 'Aktivering & Rörlighet', split: 'Rehab_Kna_A' }, { day: 'Fredag', muscle: 'Styrka & Balans', split: 'Rehab_Kna_B' }] }
+        },
+        rehab_axel: {
+          3: { name: 'Axelrehabilitering (3x/vecka)', focus: 'Rotatorkuff, skapulastabilitet och smärtfri rörelseåtergång',
+               days: [{ day: 'Måndag', muscle: 'Mobilitet & Pendel', split: 'Rehab_Axel_A' }, { day: 'Onsdag', muscle: 'Styrka & Stabilitet', split: 'Rehab_Axel_B' }, { day: 'Fredag', muscle: 'Mobilitet & Pendel', split: 'Rehab_Axel_A' }] },
+          4: { name: 'Axelrehabilitering (4x/vecka)', focus: 'Daglig rörlighet + alternerade styrkesessioner',
+               days: [{ day: 'Måndag', muscle: 'Mobilitet & Pendel', split: 'Rehab_Axel_A' }, { day: 'Tisdag', muscle: 'Styrka & Stabilitet', split: 'Rehab_Axel_B' }, { day: 'Torsdag', muscle: 'Mobilitet & Pendel', split: 'Rehab_Axel_A' }, { day: 'Fredag', muscle: 'Styrka & Stabilitet', split: 'Rehab_Axel_B' }] }
+        },
+        rehab_nacke: {
+          3: { name: 'Nackerehabilitering (3x/vecka)', focus: 'Djupa nackflexorer, cervikal mobilitet och hållning',
+               days: [{ day: 'Måndag', muscle: 'Mobilitet & Sträck', split: 'Rehab_Nacke' }, { day: 'Onsdag', muscle: 'Djupstyrka & Hållning', split: 'Rehab_Nacke_B' }, { day: 'Fredag', muscle: 'Mobilitet & Sträck', split: 'Rehab_Nacke' }] }
         },
         klimakterium: {
           2: { name: 'Styrka & Skelett (2x/vecka)', focus: 'Tung belastning + hopp – bevisat bäst mot osteoporos och muskelmassaförlust',
@@ -510,6 +541,87 @@
           { name: 'Skivstångscurl', muscle: 'Biceps', type: 'Barbell', sets: 3, reps: '6-8', difficulty: 'Medium' }
         ],
 
+        // ── PREHAB – skadeförebyggande (prioritetsordning) ──
+        Prehab_Kna: [
+          { name: 'Terminal Knee Extension (band)', muscle: 'Quadriceps', type: 'Band', sets: 3, reps: '15 per ben', difficulty: 'Easy' },
+          { name: 'Hip Abduktor (sidoliggande)', muscle: 'Höft', type: 'Bodyweight', sets: 3, reps: '15 per sida', difficulty: 'Easy' },
+          { name: 'Nordic Hamstring Curl (excentrisk)', muscle: 'Hamstrings', type: 'Bodyweight', sets: 3, reps: '6-8 excentrisk', difficulty: 'Medium' },
+          { name: 'Enbensbalans (30s)', muscle: 'Balans', type: 'Bodyweight', sets: 3, reps: '30s per ben', difficulty: 'Easy' },
+          { name: 'Lateral Band Walk', muscle: 'Höft', type: 'Band', sets: 3, reps: '15 steg per riktning', difficulty: 'Easy' }
+        ],
+        Prehab_Axel: [
+          { name: 'Band External Rotation (armbåge vid sidan)', muscle: 'Rotatorkuff', type: 'Band', sets: 3, reps: '15 per arm', difficulty: 'Easy' },
+          { name: 'Face Pull (band/kabel)', muscle: 'Rotatorkuff', type: 'Band', sets: 3, reps: '15-20', difficulty: 'Easy' },
+          { name: 'YTW (prone raises)', muscle: 'Axlar', type: 'Bodyweight', sets: 3, reps: '10 per position', difficulty: 'Easy' },
+          { name: 'Wall Slide / Wall Angel', muscle: 'Skapula', type: 'Bodyweight', sets: 3, reps: '12', difficulty: 'Easy' },
+          { name: 'Skapulär Push-up', muscle: 'Skapula', type: 'Bodyweight', sets: 3, reps: '12-15', difficulty: 'Easy' }
+        ],
+        Prehab_Rygg: [
+          { name: 'Bird-Dog', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '10 per sida (5s håll)', difficulty: 'Easy' },
+          { name: 'Dead Bug', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '10 per sida', difficulty: 'Easy' },
+          { name: 'McGill Curl-up', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '8 (10s håll)', difficulty: 'Easy' },
+          { name: 'Sidoplankan', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '30s per sida', difficulty: 'Easy' },
+          { name: 'Glute Bridge (bilateral)', muscle: 'Glutes', type: 'Bodyweight', sets: 3, reps: '15', difficulty: 'Easy' }
+        ],
+
+        // ── REHAB – rehabilitering (kurerade, kliniskt baserade) ──
+        Rehab_Rygg_A: [
+          { name: 'Cat-Cow (andningsfokus)', muscle: 'Rygg', type: 'Bodyweight', sets: 2, reps: '10 långsamt', difficulty: 'Easy' },
+          { name: 'Knä till bröstet (supine)', muscle: 'Rygg', type: 'Bodyweight', sets: 2, reps: '30s per sida', difficulty: 'Easy' },
+          { name: 'Glute Bridge', muscle: 'Glutes', type: 'Bodyweight', sets: 3, reps: '12 (2s håll)', difficulty: 'Easy' },
+          { name: 'Bird-Dog (kontrollerat)', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '8 per sida (5s håll)', difficulty: 'Easy' },
+          { name: 'Child\'s Pose (håll 60s)', muscle: 'Rygg', type: 'Bodyweight', sets: 2, reps: '60s', difficulty: 'Easy' }
+        ],
+        Rehab_Rygg_B: [
+          { name: 'Dead Bug (lätt)', muscle: 'Core', type: 'Bodyweight', sets: 3, reps: '8 per sida', difficulty: 'Easy' },
+          { name: 'Modifierad Sidoplankan (knä i golv)', muscle: 'Core', type: 'Bodyweight', sets: 2, reps: '20s per sida', difficulty: 'Easy' },
+          { name: 'Psoas-stretch (höftflexor)', muscle: 'Höft', type: 'Bodyweight', sets: 2, reps: '45s per sida', difficulty: 'Easy' },
+          { name: 'Piriformis-stretch (figur-4)', muscle: 'Höft', type: 'Bodyweight', sets: 2, reps: '45s per sida', difficulty: 'Easy' },
+          { name: 'Partial Wall Sit (0-45°)', muscle: 'Ben', type: 'Bodyweight', sets: 3, reps: '30s', difficulty: 'Easy' }
+        ],
+        Rehab_Kna_A: [
+          { name: 'Quad Set (isometrisk aktivering)', muscle: 'Quadriceps', type: 'Bodyweight', sets: 3, reps: '10 (10s håll)', difficulty: 'Easy' },
+          { name: 'Straight Leg Raise', muscle: 'Quadriceps', type: 'Bodyweight', sets: 3, reps: '12 per ben', difficulty: 'Easy' },
+          { name: 'Ankle Pumps', muscle: 'Vader', type: 'Bodyweight', sets: 2, reps: '30 per riktning', difficulty: 'Easy' },
+          { name: 'Terminal Knee Extension (band)', muscle: 'Quadriceps', type: 'Band', sets: 3, reps: '15 per ben', difficulty: 'Easy' },
+          { name: 'Häl-till-skinka (prone hamstring)', muscle: 'Hamstrings', type: 'Bodyweight', sets: 2, reps: '15 per ben', difficulty: 'Easy' }
+        ],
+        Rehab_Kna_B: [
+          { name: 'Mini Squat (0-45°)', muscle: 'Ben', type: 'Bodyweight', sets: 3, reps: '12', difficulty: 'Easy' },
+          { name: 'Steg-up (5-10 cm låg trappa)', muscle: 'Ben', type: 'Bodyweight', sets: 3, reps: '10 per ben', difficulty: 'Easy' },
+          { name: 'Hip Abduktor (sidoliggande)', muscle: 'Höft', type: 'Bodyweight', sets: 3, reps: '15 per sida', difficulty: 'Easy' },
+          { name: 'Bilateral Vadpress (stående)', muscle: 'Vader', type: 'Bodyweight', sets: 3, reps: '15', difficulty: 'Easy' },
+          { name: 'Enbensbalans (stöd ok)', muscle: 'Balans', type: 'Bodyweight', sets: 3, reps: '20s per ben', difficulty: 'Easy' }
+        ],
+        Rehab_Axel_A: [
+          { name: 'Pendulum-övning (Codman\'s)', muscle: 'Axel', type: 'Bodyweight', sets: 2, reps: '30s cirklar per arm', difficulty: 'Easy' },
+          { name: 'Finger-promenad på vägg', muscle: 'Axel', type: 'Bodyweight', sets: 2, reps: '3x upp/ned', difficulty: 'Easy' },
+          { name: 'Armhävning mot vägg', muscle: 'Bröst', type: 'Bodyweight', sets: 3, reps: '12', difficulty: 'Easy' },
+          { name: 'Skapulär Retraktion', muscle: 'Skapula', type: 'Bodyweight', sets: 3, reps: '15 (2s håll)', difficulty: 'Easy' },
+          { name: 'Internal Rotation Stretch (handduk)', muscle: 'Axel', type: 'Bodyweight', sets: 2, reps: '30s per arm', difficulty: 'Easy' }
+        ],
+        Rehab_Axel_B: [
+          { name: 'Side-lying External Rotation', muscle: 'Rotatorkuff', type: 'Dumbbell', sets: 3, reps: '12 per arm (lätt vikt)', difficulty: 'Easy' },
+          { name: 'Band External Rotation (armbåge vid sidan)', muscle: 'Rotatorkuff', type: 'Band', sets: 3, reps: '15 per arm', difficulty: 'Easy' },
+          { name: 'Shoulder Flexion med käpp/wand', muscle: 'Axel', type: 'Bodyweight', sets: 2, reps: '15 (smärtfritt läge)', difficulty: 'Easy' },
+          { name: 'Serratus-aktivering (väggpush)', muscle: 'Skapula', type: 'Bodyweight', sets: 3, reps: '12', difficulty: 'Easy' },
+          { name: 'Crossbody Stretch (axelsträckning)', muscle: 'Axel', type: 'Bodyweight', sets: 2, reps: '30s per arm', difficulty: 'Easy' }
+        ],
+        Rehab_Nacke: [
+          { name: 'Chin Tuck (dubbelhakor)', muscle: 'Nacke', type: 'Bodyweight', sets: 3, reps: '10 (5s håll)', difficulty: 'Easy' },
+          { name: 'Cervikal Flexion (fram – sakta)', muscle: 'Nacke', type: 'Bodyweight', sets: 2, reps: '8 (smärtfritt)', difficulty: 'Easy' },
+          { name: 'Cervikal Rotation (sakta)', muscle: 'Nacke', type: 'Bodyweight', sets: 2, reps: '8 per sida', difficulty: 'Easy' },
+          { name: 'Övre Trapeziussträckning', muscle: 'Nacke', type: 'Bodyweight', sets: 2, reps: '30s per sida', difficulty: 'Easy' },
+          { name: 'Levator Scapulae-sträckning', muscle: 'Nacke', type: 'Bodyweight', sets: 2, reps: '30s per sida', difficulty: 'Easy' }
+        ],
+        Rehab_Nacke_B: [
+          { name: 'Isometrisk Nacke Framåt (hand mot panna)', muscle: 'Nacke', type: 'Bodyweight', sets: 3, reps: '10 (5s håll)', difficulty: 'Easy' },
+          { name: 'Isometrisk Nacke Sida (hand mot tinning)', muscle: 'Nacke', type: 'Bodyweight', sets: 3, reps: '10 per sida (5s)', difficulty: 'Easy' },
+          { name: 'Thorakal Extension (foamroller)', muscle: 'Rygg', type: 'Bodyweight', sets: 2, reps: '60s', difficulty: 'Easy' },
+          { name: 'Skulderrotation (bakåt cirklar)', muscle: 'Axlar', type: 'Bodyweight', sets: 2, reps: '15 bakåt', difficulty: 'Easy' },
+          { name: 'Blick-fixering (VOR-övning)', muscle: 'Nacke', type: 'Bodyweight', sets: 2, reps: '10 per riktning', difficulty: 'Easy' }
+        ],
+
         // ── Klimakterie 40+ – styrka + benbelastning + balans ──
         Klima_A: [
           { name: 'Knäböj (Skivstång)', muscle: 'Ben', type: 'Barbell', sets: 4, reps: '5-8', difficulty: 'Heavy' },
@@ -567,13 +679,14 @@
         const template = this.getTemplate(programType, daysPerWeek);
         const isCardio = ['hiit', 'kondition'].includes(programType);
         const isPappa = programType === 'pappakraft';
+        const isRehab = programType.startsWith('rehab_') || programType === 'prehab';
         const exCount = isCardio ? 5 : (daysPerWeek <= 3 ? 4 : 5);
 
         const schedule = template.days.map(day => ({
           day: day.day,
           muscle: day.muscle,
           split: day.split,
-          exercises: this.getExercises(day.split, isPappa ? 5 : exCount, isPappa)
+          exercises: this.getExercises(day.split, (isPappa || isRehab) ? 5 : exCount, isPappa || isRehab)
         }));
 
         return {
@@ -743,7 +856,8 @@
       GOALS: {
         strength:     { sessionThreshold: 0.90, passRate: 0.85, repeatRate: 0.70 },
         hypertrophy:  { sessionThreshold: 0.85, passRate: 0.85, repeatRate: 0.70 },
-        conditioning: { sessionThreshold: 0.90, passRate: 0.85, repeatRate: 0.70 }
+        conditioning: { sessionThreshold: 0.90, passRate: 0.85, repeatRate: 0.70 },
+        rehab:        { sessionThreshold: 0.60, passRate: 1.00, repeatRate: 0.50 } // always progress – rehab manages its own pace
       },
 
       cfg(goal) {
@@ -1417,18 +1531,39 @@
         html += '<h2>Skapa träningsprogram</h2>';
 
         html += '<h3 style="margin:1rem 0 0.75rem;">1. Välj typ av träning</h3>';
-        html += '<div class="grid-2">';
-        Object.entries(WorkoutLibrary.programTypes).forEach(([key, pt]) => {
-          const active = key === selType;
-          const isLocked = !this.state.isPremium && !this.FREE_PROGRAM_TYPES.includes(key);
-          html += '<div onclick="app.selectProgramType(\'' + key + '\')" style="background:' + (active ? 'rgba(16,185,129,0.15)' : 'var(--card-bg)') + ';border:2px solid ' + (active ? 'var(--primary)' : '#333') + ';border-radius:0.75rem;padding:1rem;cursor:pointer;transition:0.2s;' + (isLocked ? 'opacity:0.75;' : '') + '">';
-          html += '<div style="font-size:1.8rem;margin-bottom:0.25rem;">' + pt.icon + '</div>';
-          html += '<div style="font-weight:700;font-size:0.92rem;">' + pt.name + '</div>';
-          html += '<div style="color:var(--text-muted);font-size:0.76rem;margin-top:0.2rem;">' + pt.desc + '</div>';
-          if (isLocked) html += '<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.35rem;">🔒 Premium</div>';
-          html += '</div>';
+
+        const groups = [
+          { label: '💪 Styrka & Fitness', types: ['styrka','helkropp','kroppsvikt','pappakraft','klimakterium'] },
+          { label: '🏃 Cardio & Sport', types: ['hiit','kondition','powerlifting'] },
+          { label: '⚕️ Rehab & Prehab', types: ['prehab','rehab_rygg','rehab_kna','rehab_axel','rehab_nacke'], isRehab: true }
+        ];
+
+        groups.forEach(grp => {
+          html += '<div style="margin-bottom:0.25rem;"><div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin:1rem 0 0.5rem;">' + grp.label + '</div>';
+          html += '<div class="grid-2">';
+          grp.types.forEach(key => {
+            const pt = WorkoutLibrary.programTypes[key];
+            if (!pt) return;
+            const active = key === selType;
+            const isLocked = !this.state.isPremium && (!this.FREE_PROGRAM_TYPES.includes(key) || pt.premium);
+            html += '<div onclick="app.selectProgramType(\'' + key + '\')" style="background:' + (active ? 'rgba(16,185,129,0.15)' : 'var(--card-bg)') + ';border:2px solid ' + (active ? 'var(--primary)' : '#333') + ';border-radius:0.75rem;padding:1rem;cursor:pointer;transition:0.2s;' + (isLocked ? 'opacity:0.7;' : '') + '">';
+            html += '<div style="font-size:1.8rem;margin-bottom:0.25rem;">' + pt.icon + '</div>';
+            html += '<div style="font-weight:700;font-size:0.88rem;">' + pt.name + '</div>';
+            html += '<div style="color:var(--text-muted);font-size:0.74rem;margin-top:0.2rem;">' + pt.desc + '</div>';
+            if (isLocked) html += '<div style="font-size:0.68rem;color:var(--text-muted);margin-top:0.35rem;">🔒 Premium</div>';
+            html += '</div>';
+          });
+          html += '</div></div>';
         });
-        html += '</div>';
+
+        // Medical disclaimer for rehab types
+        const isRehabSel = selType && (selType.startsWith('rehab_') || selType === 'prehab');
+        if (isRehabSel) {
+          html += '<div style="background:rgba(249,115,22,0.1);border:1.5px solid var(--accent);border-radius:0.75rem;padding:1rem;margin:0.75rem 0;">';
+          html += '<div style="font-weight:700;color:var(--accent);margin-bottom:0.4rem;">⚕️ Medicinsk ansvarsfriskrivning</div>';
+          html += '<p style="font-size:0.82rem;color:var(--text-muted);margin:0;">Dessa program är ett <strong style="color:#e2e8f0;">komplement – inte ersättning</strong> för professionell sjukvård. Konsultera alltid en fysioterapeut eller läkare innan start. <strong style="color:#e2e8f0;">Avbryt omedelbart</strong> vid ökad smärta, domningar eller stelhet.</p>';
+          html += '</div>';
+        }
 
         if (selType) {
           const pt = WorkoutLibrary.programTypes[selType];
@@ -1789,6 +1924,17 @@
           HIIT_Upper: ['chest','shoulders','back'],
           HIIT_Full:  ['chest','back','quads','core'],
           HIIT_Core:  ['core'],
+          Prehab_Kna:     ['quads','hamstrings'],
+          Prehab_Axel:    ['shoulders','back'],
+          Prehab_Rygg:    ['core','back','glutes'],
+          Rehab_Rygg_A:   ['back','core','glutes'],
+          Rehab_Rygg_B:   ['core','back'],
+          Rehab_Kna_A:    ['quads','hamstrings','calves'],
+          Rehab_Kna_B:    ['quads','glutes','calves'],
+          Rehab_Axel_A:   ['shoulders','chest'],
+          Rehab_Axel_B:   ['shoulders','back'],
+          Rehab_Nacke:    ['shoulders','back'],
+          Rehab_Nacke_B:  ['shoulders','back'],
           Cardio_Interval:['quads','calves'], Cardio_Tempo:['quads','calves'],
           Cardio_Long:['quads','calves'], Cardio_Easy:['quads','calves'], Cardio_Strength:['quads','core']
         };
@@ -1903,8 +2049,9 @@
       renderUpgradeModal(reason) {
         const reasons = {
           programs: 'Gratisversionen tillåter <strong>1 träningsprogram</strong>. Uppgradera för obegränsat antal program.',
-          progType: 'Gratisversionen inkluderar <strong>Styrka, Helkropp och Kroppsvikt</strong>. Uppgradera för Powerlifting, HIIT och Kondition.',
-          customEx: 'Gratisversionen tillåter <strong>3 egna övningar</strong>. Uppgradera för obegränsat antal.'
+          progType: 'Gratisversionen inkluderar <strong>Styrka, Helkropp, Kroppsvikt och Pappakraft</strong>. Uppgradera för Powerlifting, HIIT, Kondition och alla Rehab-program.',
+          customEx: 'Gratisversionen tillåter <strong>3 egna övningar</strong>. Uppgradera för obegränsat antal.',
+          rehab:    '<strong>Rehab & Prehab-program</strong> är exklusiva Premium-program med kliniskt kurerade övningar.'
         };
         const existing = document.querySelector('.modal-overlay');
         if (existing) existing.remove();
@@ -2131,7 +2278,8 @@
 
         // Freemium checks
         if (!this.state.isPremium && this.state.programs.length >= 1) { this.renderUpgradeModal('programs'); return; }
-        if (!this.state.isPremium && !this.FREE_PROGRAM_TYPES.includes(programType)) { this.renderUpgradeModal('progType'); return; }
+        const ptConfig = WorkoutLibrary.programTypes[programType] || {};
+        if (!this.state.isPremium && (!this.FREE_PROGRAM_TYPES.includes(programType) || ptConfig.premium)) { this.renderUpgradeModal('progType'); return; }
 
         if (!name) { this.showToast('Ange programnamn', 'error'); return; }
         if (!daysStr) { this.showToast('Välj antal träningsdagar', 'error'); return; }
