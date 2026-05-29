@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "se.radiobaron.gordito",
-    "sha256_cert_fingerprints": ["62:87:A2:17:8A:F5:F7:6D:CF:FE:35:F7:74:B9:F1:F8:BC:8D:CE:58:4B:1A:C4:D0:6C:A0:B7:C1:AE:53:DD:47"]
+    "sha256_cert_fingerprints": ["73:F5:82:F9:F6:E6:A2:3B:2D:7E:62:FC:85:7B:A6:D8:40:45:14:DB:53:4B:FE:03:A1:48:16:10:A9:CF:4E:7B"]
   }
 }]
